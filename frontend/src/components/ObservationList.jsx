@@ -1,44 +1,137 @@
 export function ObservationList({ observations }) {
   if (!observations || observations.length === 0) {
     return (
-      <p style={{ color: '#6b7280', fontStyle: 'italic' }}>
-        No recent observations
-      </p>
+      <div
+        style={{
+          textAlign: 'center',
+          padding: '40px 20px',
+          backgroundColor: '#f8fafc',
+          borderRadius: '12px',
+          border: '2px dashed #cbd5e1',
+        }}
+      >
+        <p
+          style={{
+            color: '#64748b',
+            fontSize: '15px',
+            margin: 0,
+          }}
+        >
+          No recent observations
+        </p>
+      </div>
     );
   }
 
   return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       {observations.map((obs, index) => (
         <div
           key={obs.id || index}
           style={{
-            padding: '12px',
-            borderBottom: '1px solid #e5e7eb',
-            backgroundColor: index % 2 === 0 ? '#f9fafb' : 'white',
+            padding: '20px',
+            backgroundColor: '#f8fafc',
+            borderRadius: '12px',
+            border: '1px solid #e2e8f0',
+            transition: 'all 0.2s',
+            cursor: 'pointer',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#ffffff';
+            e.currentTarget.style.borderColor = '#0ea5e9';
+            e.currentTarget.style.transform = 'translateX(4px)';
+            e.currentTarget.style.boxShadow =
+              '0 4px 12px rgba(14, 165, 233, 0.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#f8fafc';
+            e.currentTarget.style.borderColor = '#e2e8f0';
+            e.currentTarget.style.transform = 'translateX(0)';
+            e.currentTarget.style.boxShadow = 'none';
           }}
         >
           <div
             style={{
               display: 'flex',
               justifyContent: 'space-between',
-              marginBottom: '4px',
+              marginBottom: '12px',
+              alignItems: 'center',
             }}
           >
-            <strong>{obs.postcode}</strong>
-            <span style={{ color: '#6b7280', fontSize: '14px' }}>
+            <strong
+              style={{
+                color: '#0ea5e9',
+                fontSize: '17px',
+                fontWeight: '700',
+              }}
+            >
+              📍 {obs.postcode}
+            </strong>
+            <span
+              style={{
+                color: '#64748b',
+                fontSize: '13px',
+                backgroundColor: '#ffffff',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                border: '1px solid #e2e8f0',
+                fontWeight: '500',
+              }}
+            >
               {new Date(obs.timestamp).toLocaleDateString()}
             </span>
           </div>
-          <div style={{ fontSize: '14px', color: '#374151' }}>
+          <div
+            style={{
+              fontSize: '15px',
+              color: '#334155',
+              marginBottom: '12px',
+              lineHeight: '1.6',
+              fontWeight: '500',
+            }}
+          >
             {obs.observation}
           </div>
           {obs.measurements && (
             <div
-              style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}
+              style={{
+                fontSize: '13px',
+                color: '#64748b',
+                display: 'flex',
+                gap: '12px',
+                marginTop: '12px',
+              }}
             >
-              Temp: {obs.measurements.temperature}°C | Humidity:{' '}
-              {obs.measurements.humidity}%
+              <span
+                style={{
+                  backgroundColor: '#ffffff',
+                  padding: '8px 14px',
+                  borderRadius: '8px',
+                  border: '1px solid #e2e8f0',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <span style={{ fontSize: '16px' }}>🌡️</span>
+                {obs.measurements.temperature}°C
+              </span>
+              <span
+                style={{
+                  backgroundColor: '#ffffff',
+                  padding: '8px 14px',
+                  borderRadius: '8px',
+                  border: '1px solid #e2e8f0',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <span style={{ fontSize: '16px' }}>💧</span>
+                {obs.measurements.humidity}%
+              </span>
             </div>
           )}
         </div>
