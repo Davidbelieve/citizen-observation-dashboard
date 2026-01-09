@@ -88,7 +88,7 @@ export function DashboardTemplate() {
     )
   }
   
-  const regionName = region.replace(/-/g, ' ')
+  const regionName =  region.replace(/-/g, ' ')
   
   return (
     <div style={{ 
