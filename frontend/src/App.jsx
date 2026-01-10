@@ -12,6 +12,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/hub" element={<Hub />} />
+        
+        {/* All regional dashboards use the template */}
         <Route path="/dashboard/:region" element={<DashboardTemplate />} />
       </Routes>
     </BrowserRouter>
