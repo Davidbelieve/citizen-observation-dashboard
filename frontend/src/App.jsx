@@ -1,4 +1,27 @@
-import { Card } from './components/Card'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Login } from './pages/Login'
+import { Register } from './pages/Register'
+import { Hub }from './pages/Hub'
+import { DashboardTemplate}  from './pages/DashboardTemplate'
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element ={<Navigate to="/login" />} />
+        <Route path="/login" element ={<Login />} />
+        <Route path="/register" element ={<Register />} />
+        <Route path="/hub" element ={<Hub />} />
+        <Route path="/dashboard/:region" element ={<DashboardTemplate />} />
+        {/* Individual dashboard routes will be added here */}
+      </Routes>
+   </BrowserRouter>
+  )
+}
+
+export default App
+
+/*import { Card } from './components/Card'
 import { StatCard } from './components/StatCard'
 import { ObservationList } from './components/ObservationList'
 import { Leaderboard } from './components/Leaderboard'
@@ -60,4 +83,4 @@ function App() {
   )
 }
 
-export default App
+export default App*/
