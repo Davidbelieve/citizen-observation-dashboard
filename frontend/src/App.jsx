@@ -77,12 +77,11 @@ function App() {
           <ObservationList observations={mockObservations} />
         </Card>
         
-        <Card title="Top Contributors">
-          <Leaderboard contributors={mockContributors} />
-        </Card>
-      </div>
-    </div>
+        {/* All regional dashboards use the template */}
+        <Route path="/dashboard/:region" element={<DashboardTemplate />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
-export default App*/
+export default App
