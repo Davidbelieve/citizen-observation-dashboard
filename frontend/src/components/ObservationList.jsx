@@ -129,8 +129,38 @@ export function ObservationList({ observations }) {
                   gap: '6px',
                 }}
               >
+                <span style={{ fontSize: '16px' }}>🧪</span>
+                {obs.measurements.ph} pH
+              </span>
+              <span
+                style={{
+                  backgroundColor: '#ffffff',
+                  padding: '8px 14px',
+                  borderRadius: '8px',
+                  border: '1px solid #e2e8f0',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
                 <span style={{ fontSize: '16px' }}>💧</span>
-                {obs.measurements.humidity}%
+                {obs.measurements.alkalinity} mg/L
+              </span>
+              <span
+                style={{
+                  backgroundColor: '#ffffff',
+                  padding: '8px 14px',
+                  borderRadius: '8px',
+                  border: '1px solid #e2e8f0',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <span style={{ fontSize: '16px' }}>☁️</span>
+                {obs.measurements.turbidity} NTU
               </span>
             </div>
           )}

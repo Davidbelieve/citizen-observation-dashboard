@@ -9,6 +9,12 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false
+      },
+      '/jasmineAPI': {
+        target: 'http://localhost:8086/citizenscience',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/jasmineAPI/, '')
       }
     }
   }
