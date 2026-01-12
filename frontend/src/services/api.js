@@ -1,5 +1,6 @@
 // Mock mode - set to false when real backend is ready
-const USE_MOCK_DATA = true
+const USE_MOCK_DATA = false
+
 
 const API_BASE_URL = 'http://localhost:8080/api'
 
