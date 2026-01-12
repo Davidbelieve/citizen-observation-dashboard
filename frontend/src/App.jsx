@@ -4,6 +4,7 @@ import { Register } from './pages/Register'
 import { Hub }from './pages/Hub'
 import { DashboardTemplate}  from './pages/DashboardTemplate'
 import { LolaDashboard } from './pages/LolaDashboard'
+import { JasmineDashboard } from './pages/JasmineDashboard'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/register" element ={<Register />} />
         <Route path="/hub" element ={<Hub />} />
         <Route path="/dashboard/north-west-england" element={<LolaDashboard />} />
+        <Route path="/dashboard/yorkshire" element={<JasmineDashboard />} />
         <Route path="/dashboard/:region" element ={<DashboardTemplate />} />
         {/* Individual dashboard routes will be added here */}
       </Routes>

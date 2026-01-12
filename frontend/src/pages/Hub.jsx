@@ -10,7 +10,8 @@ export function Hub() {
     { id: 'north-west-england', name: 'North West England', icon: '📍' },
     { id: 'east-midlands', name: 'East Midlands', icon: '📍' },
     { id: 'west-midlands', name: 'West Midlands', icon: '📍' },
-    { id: 'south-east-england', name: 'South East England', icon: '📍' }
+    { id: 'south-east-england', name: 'South East England', icon: '📍' },
+    { id: 'yorkshire', name: 'Yorkshire and the Humber', icon: '📍' }
   ]
 
   const handleLogout = () => {
