@@ -69,8 +69,9 @@ Each dashboard needs these endpoints:
 
 | Region | Developer | Port |
 |--------|-----------|------|
-| North East | [Name] | 8081 |
-| North West | [Name] | 8082 |
+| North East | Ridwan | 8081 |
+| North West | Lola | 8082 |
 | East Midlands | [Name] | 8083 |
 | West Midlands | [Name] | 8084 |
 | South East | [Name] | 8085 |
+| Yorkshire and the Humber | Jasmine | 8086 |
