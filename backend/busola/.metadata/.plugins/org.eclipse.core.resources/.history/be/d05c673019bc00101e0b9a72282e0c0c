@@ -1,0 +1,27 @@
+package com.waterQualityMonitoring.crowdsourced.controller;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import com.waterQualityMonitoring.crowdsourced.model.CrowdsourcedModel;
+import com.waterQualityMonitoring.crowdsourced.repository.CrowdsourcedRepository;
+
+public class CrowdsourcedController {
+	
+	private final CrowdsourcedRepository crowdsourcedRepository;
+	
+	public CrowdsourcedController(CrowdsourcedRepository crowdsourcedRepository) {
+		this.crowdsourcedRepository = crowdsourcedRepository;
+	}
+	
+	//create an observation
+	@PostMapping("observation")
+	public ResponseEntity<CrowdsourcedModel> createObservation(@RequestBody CrowdsourcedModel newObservation ){
+		CrowdsourcedModel newData = crowdsourcedRepository.save(newObservation);
+			return new ResponseEntity<>(newData, HttpStatus.CREATED);
+	}
+	
+	
+
+}

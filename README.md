@@ -73,5 +73,5 @@ Each dashboard needs these endpoints:
 | North West | Lola | 8082 |
 | East Midlands | [Name] | 8083 |
 | West Midlands | [Name] | 8084 |
-| South East | [Name] | 8085 |
+| South East | Oluwabusola | 8090 |
 | Yorkshire and the Humber | Jasmine | 8086 |

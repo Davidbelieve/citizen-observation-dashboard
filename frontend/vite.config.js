@@ -5,16 +5,12 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
+      // All API requests go through authentication service (port 8080)
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
-        secure: false
-      },
-      '/jasmineAPI': {
-        target: 'http://localhost:8086/citizenscience',
-        changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/jasmineAPI/, '')
+        ws: false
       }
     }
   }

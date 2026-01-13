@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { authAPI } from '../services/api'
-import { Card } from '../components/Card'
+import { Card } from '../components'
 
 export function Hub() {
   const navigate = useNavigate()
@@ -8,10 +8,10 @@ export function Hub() {
   const regions = [
     { id: 'north-east-england', name: 'North East England', icon: '📍' },
     { id: 'north-west-england', name: 'North West England', icon: '📍' },
+    { id: 'yorkshire', name: 'Yorkshire and the Humber', icon: '📍' },
     { id: 'east-midlands', name: 'East Midlands', icon: '📍' },
     { id: 'west-midlands', name: 'West Midlands', icon: '📍' },
-    { id: 'south-east-england', name: 'South East England', icon: '📍' },
-    { id: 'yorkshire', name: 'Yorkshire and the Humber', icon: '📍' }
+    { id: 'south-east-england', name: 'South East England', icon: '📍' }
   ]
 
   const handleLogout = () => {
