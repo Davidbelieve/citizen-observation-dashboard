@@ -5,12 +5,12 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      // Proxy to Oluwabusola's Spring Cloud Gateway (port 8090)
-      // Routes /api/regions/south-east-england/** to appropriate microservices
+      // All API requests go through authentication service (port 8080)
       '/api': {
-        target: 'http://localhost:8090',
+        target: 'http://localhost:8080',
         changeOrigin: true,
-        secure: false
+        secure: false,
+        ws: false
       }
     }
   }

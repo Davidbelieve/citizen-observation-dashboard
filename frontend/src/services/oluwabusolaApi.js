@@ -29,7 +29,7 @@ async function gatewayRequest(path, options = {}) {
     if (response.status === 401) {
       authAPI.logout()
       window.location.href = '/login'
-      throw new Error('Session expired')
+      throw new Error('Session expired. Please login again.')
     }
     
     if (!response.ok) {
@@ -43,7 +43,7 @@ async function gatewayRequest(path, options = {}) {
   } catch (error) {
     // Handle network errors (failed to fetch)
     if (error instanceof TypeError && error.message.includes('fetch')) {
-      throw new Error(`Network error: Unable to connect to gateway. Please ensure the gateway service is running on port 8090. Original error: ${error.message}`)
+      throw new Error(`Network error: Unable to connect to authentication service. Please ensure the authentication service is running on port 8080.`)
     }
     throw error
   }

@@ -15,9 +15,6 @@ export function RidwanDashboard({ onBack }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const DATA_API = 'http://localhost:8091';
-  const REWARDS_API = 'http://localhost:8092';
-
   useEffect(() => {
     fetchDashboardData();
   }, []);
@@ -27,11 +24,26 @@ export function RidwanDashboard({ onBack }) {
     setError('');
 
     try {
-      const observationsResponse = await fetch(`${DATA_API}/api/observations`);
-      const leaderboardResponse = await fetch(`${REWARDS_API}/api/rewards/leaderboard?limit=3`);
+      // Get auth token for authenticated requests
+      const token = localStorage.getItem('authToken');
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      };
 
-      if (!observationsResponse.ok || !leaderboardResponse.ok) {
-        throw new Error('Unable to connect to services');
+      // Route through authentication service (port 8080) → gateway (port 8090) → services (8091, 8092)
+      // All requests use /api/v1/** which routes through the gateway
+      const observationsResponse = await fetch('/api/v1/observations', { headers });
+      const leaderboardResponse = await fetch('/api/v1/rewards/leaderboard?limit=3', { headers });
+
+      if (!observationsResponse.ok) {
+        const errorData = await observationsResponse.json().catch(() => ({ message: 'Failed to fetch observations' }));
+        throw new Error(errorData.message || errorData.error || 'Unable to fetch observations');
+      }
+
+      if (!leaderboardResponse.ok) {
+        const errorData = await leaderboardResponse.json().catch(() => ({ message: 'Failed to fetch leaderboard' }));
+        throw new Error(errorData.message || errorData.error || 'Unable to fetch leaderboard');
       }
 
       const observationsData = await observationsResponse.json();
@@ -46,7 +58,7 @@ export function RidwanDashboard({ onBack }) {
       setLeaderboard(leaderboardData);
 
     } catch (err) {
-      setError('Unable to connect to North East services. Please ensure microservices are running on ports 8091 and 8092.');
+      setError(err.message || 'Unable to connect to services. Please ensure backend services are running.');
       console.error('Dashboard error:', err);
     } finally {
       setLoading(false);
@@ -121,7 +133,7 @@ export function RidwanDashboard({ onBack }) {
               <StatCard 
                 label="Region Status" 
                 value="Active" 
-                icon="✅" 
+                icon=" " 
               />
             </div>
 

@@ -47,6 +47,7 @@ public class SecurityConfig {
                 .requestMatchers("/h2-console/**").permitAll()
                 // Gateway routes - require authentication
                 .requestMatchers("/api/regions/**").authenticated()
+                .requestMatchers("/api/v1/**").authenticated()  // Routes to gateway (8090), which handles 8091 and 8092
                 // Protected endpoints - require authentication
                 .requestMatchers("/api/carbon/**").authenticated()
                 // All other requests require authentication

@@ -7,6 +7,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
@@ -82,11 +83,21 @@ public class CorsConfig implements WebMvcConfigurer {
     /**
      * RestTemplate bean for making HTTP requests to microservices.
      * Used by GatewayController to forward requests.
+     * Configured with timeouts to prevent hanging requests.
      * 
-     * @return RestTemplate instance
+     * @return RestTemplate instance with timeout configuration
      */
     @Bean
     public RestTemplate restTemplate() {
-        return new RestTemplate();
+        org.springframework.http.client.SimpleClientHttpRequestFactory factory = 
+            new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        
+        // Set connection timeout (time to establish connection)
+        factory.setConnectTimeout(5000); // 5 seconds
+        
+        // Set read timeout (time to wait for response)
+        factory.setReadTimeout(10000); // 10 seconds
+        
+        return new RestTemplate(factory);
     }
 }
