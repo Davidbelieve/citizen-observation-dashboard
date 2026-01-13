@@ -95,7 +95,7 @@ export function Hub() {
             margin: '0 auto 24px auto',
             lineHeight: '1.6'
           }}>
-            Help protect public health and preserve aquatic ecosystems by contributing water quality observations. 
+             
             Your data helps identify pollution events and supports sustainable water management across England.
           </p>
           <button
