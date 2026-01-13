@@ -63,7 +63,7 @@ export const jasmineAPI = {
           id: obs.dataID,
           postcode: obs.postcode,
           timestamp: obs.submissionTime,
-          observation: obs.observations[0] || 'No observation recorded',
+          observation: obs.observations || 'No observation recorded',
           measurements: {
             temperature: obs.temp,
             ph: obs.pH,
@@ -101,12 +101,21 @@ export const jasmineAPI = {
   // Create a new observation
   async createObservation(observationData) {
     try {
+      const remap = {
+        citizienID: observationData.citizenUniqueId,
+        postcode: observationData.postcode,
+        submissionTime: new Date().toISOString(),
+        temp: observationData.measurement.temperatureC,
+        pH: observationData.measurement.pH,
+        alkalinity: observationData.measurement.alkalinityMgPerL,
+        turbidity: observationData.measurement.turbidityNtu,
+        observations: observationData.notes || 'No observation recorded'
+      }
       const response = await gatewayRequest('/crowd', {
         method: 'POST',
-        body: JSON.stringify(observationData)
+        body: JSON.stringify(remap)
       })
-      const data = await response.json()
-      return data
+      return await response.json()
     } catch (error) {
       console.error('Error creating observation:', error)
       throw error
