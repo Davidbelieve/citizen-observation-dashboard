@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { authAPI } from '../services/api'
-import { Card } from '../components/Card'
+import { Card } from '../components'
 
 export function Login() {
   const navigate = useNavigate()
