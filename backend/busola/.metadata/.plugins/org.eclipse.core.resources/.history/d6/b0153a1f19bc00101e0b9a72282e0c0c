@@ -1,0 +1,14 @@
+package com.waterQualityMonitoring.crowdsourced.controller;
+
+import com.waterQualityMonitoring.crowdsourced.repository.CrowdsourcedRepository;
+
+public class CrowdsourcedController {
+	
+	private final CrowdsourcedRepository crowdsourcedRepository;
+	
+	public CrowdsourcedController(CrowdsourcedRepository crowdsourcedRepository) {
+		this.crowdsourcedRepository = crowdsourcedRepository;
+	}
+	
+
+}

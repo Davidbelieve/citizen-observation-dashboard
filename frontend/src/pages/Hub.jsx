@@ -1,17 +1,17 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { authAPI } from '../services/api'
-import { RegionCard } from '../components/RegionCard'
+import { Card } from '../components'
 
 export function Hub() {
   const navigate = useNavigate()
 
   const regions = [
-    { id: 'north-east-england', name: 'North East England', color: '#3B82F6' },
-    { id: 'north-west-england', name: 'North West England', color: '#EF4444' },
-    { id: 'east-midlands', name: 'East Midlands', color: '#10B981' },
-    { id: 'west-midlands', name: 'West Midlands', color: '#F59E0B' },
-    { id: 'south-east-england', name: 'South East England', color: '#8B5CF6' },
-    { id: 'yorkshire', name: 'Yorkshire and the Humber', color: '#EC4899' }
+    { id: 'north-east-england', name: 'North East England', icon: '📍', color: '#3B82F6' },
+    { id: 'north-west-england', name: 'North West England', icon: '📍', color: '#EF4444' },
+    { id: 'yorkshire', name: 'Yorkshire and the Humber', icon: '📍', color: '#EC4899' },
+    { id: 'east-midlands', name: 'East Midlands', icon: '📍', color: '#10B981' },
+    { id: 'west-midlands', name: 'West Midlands', icon: '📍', color: '#F59E0B' },
+    { id: 'south-east-england', name: 'South East England', icon: '📍', color: '#8B5CF6' }
   ]
 
   const handleLogout = () => {
@@ -95,7 +95,7 @@ export function Hub() {
             margin: '0 auto 24px auto',
             lineHeight: '1.6'
           }}>
-             
+            Help protect public health and preserve aquatic ecosystems by contributing water quality observations. 
             Your data helps identify pollution events and supports sustainable water management across England.
           </p>
           <button
@@ -145,7 +145,7 @@ export function Hub() {
         {/* Region Cards Grid */}
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', 
+          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
           gap: '24px' 
         }}>
           {regions.map(region => (
@@ -154,11 +154,45 @@ export function Hub() {
               to={`/dashboard/${region.id}`} 
               style={{ textDecoration: 'none' }}
             >
-              <RegionCard
-                region={region.name}
-                color={region.color}
-                onClick={() => {}}
-              />
+              <Card>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '16px', 
+                  padding: '16px' 
+                }}>
+                  <div style={{ 
+                    fontSize: '48px',
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '50%',
+                    backgroundColor: `${region.color}20`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    {region.icon}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{ 
+                      fontSize: '20px', 
+                      fontWeight: '600', 
+                      color: '#111827', 
+                      margin: '0 0 4px 0' 
+                    }}>
+                      {region.name}
+                    </h3>
+                    <p style={{ 
+                      color: region.color, 
+                      fontSize: '14px', 
+                      margin: 0,
+                      fontWeight: '500'
+                    }}>
+                      View regional data →
+                    </p>
+                  </div>
+                </div>
+              </Card>
             </Link>
           ))}
         </div>

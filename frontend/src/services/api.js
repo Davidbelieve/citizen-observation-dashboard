@@ -1,16 +1,8 @@
 // Mock mode - set to false when real backend is ready
 const USE_MOCK_DATA = true
 
-const API_BASE_URL = 'http://localhost:8080/api'
-
-const REGION_API_URLS = {
-  'north-east-england': 'http://localhost:8081',
-  'north-west-england': 'http://localhost:8082',
-  'east-midlands': 'http://localhost:8083',
-  'west-midlands': 'http://localhost:8084',
-  'south-east-england': 'http://localhost:8085'
-}
-
+// Unified API Base URL - All requests go through authentication gateway
+const API_BASE_URL = '/api'
 // Mock data storage (simulates a database)
 const mockUsers = [
   { username: 'demo', password: 'demo123' }
@@ -102,6 +94,10 @@ const mockAuthAPI = {
   
   isAuthenticated: () => {
     return !!localStorage.getItem('authToken')
+  },
+  
+  getToken: () => {
+    return localStorage.getItem('authToken')
   }
 }
 
@@ -127,9 +123,14 @@ const mockDashboardAPI = {
   }
 }
 
-// Real API helper
+// Real API helper - Enhanced to always include auth token
 async function apiRequest(url, options = {}) {
   const token = localStorage.getItem('authToken')
+  
+  if (!token && !options.skipAuth) {
+    // Redirect to login if no token (unless explicitly skipping auth)
+    throw new Error('Not authenticated. Please login.')
+  }
   
   const config = {
     headers: {
@@ -142,6 +143,14 @@ async function apiRequest(url, options = {}) {
   
   try {
     const response = await fetch(url, config)
+    
+    // Handle 401 Unauthorized - token expired or invalid
+    if (response.status === 401) {
+      localStorage.removeItem('authToken')
+      localStorage.removeItem('username')
+      window.location.href = '/login'
+      throw new Error('Session expired. Please login again.')
+    }
     
     if (!response.ok) {
       const error = await response.json().catch(() => ({ 
@@ -157,23 +166,26 @@ async function apiRequest(url, options = {}) {
   }
 }
 
-// Real Authentication API
+// Real Authentication API - Uses unified endpoint
 const realAuthAPI = {
   register: async (username, password) => {
     return apiRequest(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ username, password }),
+      skipAuth: true // Registration doesn't need auth
     })
   },
   
   login: async (username, password) => {
     const response = await apiRequest(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ username, password }),
+      skipAuth: true // Login doesn't need auth
     })
     
     if (response.token) {
       localStorage.setItem('authToken', response.token)
+      localStorage.setItem('username', username)
     }
     
     return response
@@ -181,26 +193,27 @@ const realAuthAPI = {
   
   logout: () => {
     localStorage.removeItem('authToken')
+    localStorage.removeItem('username')
   },
   
   isAuthenticated: () => {
     return !!localStorage.getItem('authToken')
+  },
+  
+  getToken: () => {
+    return localStorage.getItem('authToken')
   }
 }
 
-// Real Dashboard API
+// Real Dashboard API - Routes through gateway
 const realDashboardAPI = {
   getTotalCount: async (region) => {
-    const baseUrl = REGION_API_URLS[region]
-    
-    if (!baseUrl) {
-      throw new Error(`Unknown region: ${region}`)
-    }
-    
     try {
-      const response = await fetch(`${baseUrl}/observations/count?region=${region}`)
-      if (!response.ok) throw new Error('Failed to fetch count')
-      return await response.json()
+      // Route through gateway: /api/regions/{region}/observations/count
+      const response = await apiRequest(
+        `${API_BASE_URL}/regions/${region}/observations/count?region=${region}`
+      )
+      return response
     } catch (error) {
       console.error('Error fetching count:', error)
       return { count: 0 }
@@ -208,16 +221,12 @@ const realDashboardAPI = {
   },
   
   getRecentObservations: async (region, limit = 5) => {
-    const baseUrl = REGION_API_URLS[region]
-    
-    if (!baseUrl) {
-      throw new Error(`Unknown region: ${region}`)
-    }
-    
     try {
-      const response = await fetch(`${baseUrl}/observations/recent?region=${region}&limit=${limit}`)
-      if (!response.ok) throw new Error('Failed to fetch observations')
-      return await response.json()
+      // Route through gateway: /api/regions/{region}/observations/recent
+      const response = await apiRequest(
+        `${API_BASE_URL}/regions/${region}/observations/recent?region=${region}&limit=${limit}`
+      )
+      return response
     } catch (error) {
       console.error('Error fetching observations:', error)
       return { observations: [] }
@@ -225,19 +234,32 @@ const realDashboardAPI = {
   },
   
   getLeaderboard: async (region, limit = 3) => {
-    const baseUrl = REGION_API_URLS[region]
-    
-    if (!baseUrl) {
-      throw new Error(`Unknown region: ${region}`)
-    }
-    
     try {
-      const response = await fetch(`${baseUrl}/contributors/leaderboard?region=${region}&limit=${limit}`)
-      if (!response.ok) throw new Error('Failed to fetch leaderboard')
-      return await response.json()
+      // Route through gateway: /api/regions/{region}/contributors/leaderboard
+      const response = await apiRequest(
+        `${API_BASE_URL}/regions/${region}/contributors/leaderboard?region=${region}&limit=${limit}`
+      )
+      return response
     } catch (error) {
       console.error('Error fetching leaderboard:', error)
       return { contributors: [] }
+    }
+  },
+
+  createObservation: async (region, observationData) => {
+    try {
+      // Route through gateway: /api/regions/{region}/observations
+      const response = await apiRequest(
+        `${API_BASE_URL}/regions/${region}/observations`,
+        {
+          method: 'POST',
+          body: JSON.stringify(observationData)
+        }
+      )
+      return response
+    } catch (error) {
+      console.error('Error creating observation:', error)
+      throw error
     }
   }
 }
@@ -246,5 +268,4 @@ const realDashboardAPI = {
 export const authAPI = USE_MOCK_DATA ? mockAuthAPI : realAuthAPI
 export const dashboardAPI = USE_MOCK_DATA ? mockDashboardAPI : realDashboardAPI
 
-export { REGION_API_URLS }
 export default { authAPI, dashboardAPI }
