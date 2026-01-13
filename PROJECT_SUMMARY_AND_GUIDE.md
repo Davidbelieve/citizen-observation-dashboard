@@ -460,87 +460,56 @@ import { YourNameDashboard } from './pages/YourNameDashboard'
 } />
 ```
 
-### Step 4: Update Vite Proxy Configuration
+### Step 4: Vite Proxy Configuration (Already Configured!)
 
-**IMPORTANT**: Since authentication is on port 8080 and gateway is on 8090, you need to configure the proxy properly.
+**IMPORTANT**: The Vite proxy is already configured correctly! All `/api/**` requests go to port 8080 (authentication service), which then routes to the appropriate microservices.
 
-Update `frontend/vite.config.js`:
-
+**Current Configuration** (`frontend/vite.config.js`):
 ```javascript
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react-swc'
-  
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    proxy: {
-      // Authentication endpoints go to port 8080
-      '/api/auth': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        secure: false
-      },
-      // All other /api requests go to gateway (port 8090)
-      '/api': {
-        target: 'http://localhost:8090',
-        changeOrigin: true,
-        secure: false
-      }
-    }
-  }
-})
+'/api': {
+  target: 'http://localhost:8080',  // All API requests go here
+  changeOrigin: true,
+  secure: false,
+  ws: false
+}
 ```
 
-**Note**: The order matters! More specific routes (`/api/auth`) must come before general routes (`/api`).
+**No changes needed!** The authentication service (8080) handles all routing through `GatewayController`.
 
 ---
 
-## 🔧 Updating Authentication Endpoint
+## 🔧 Current Architecture Overview
 
-### Current Setup
-- **Main Authentication**: Port 8080 (`/api/auth/*`)
-- **Gateway**: Port 8090 (`/api/v1/*`)
-- **Crowdsourced Service**: Port 8091
-- **Reward Service**: Port 8092
+### Centralized Routing Through Authentication Service
 
-### If Authentication is on Port 8080
+**All API requests flow through port 8080 (Authentication Service):**
 
-Update your `frontend/vite.config.js` to handle both authentication (8080) and gateway (8090):
-
-```javascript
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react-swc'
-  
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    proxy: {
-      // Authentication endpoints go to port 8080
-      '/api/auth': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        secure: false
-      },
-      // All other /api requests (including /api/v1) go to gateway (port 8090)
-      '/api': {
-        target: 'http://localhost:8090',
-        changeOrigin: true,
-        secure: false
-      }
-    }
-  }
-})
+```
+Frontend → /api/anything
+    ↓
+Vite Proxy → http://localhost:8080/api/anything
+    ↓
+Authentication Service (8080)
+    ├─ /api/auth/** → Handled by AuthController (local)
+    ├─ /api/v1/** → Routes to Gateway (8090) → Routes to 8091/8092
+    ├─ /api/regions/** → Routes to region-specific services
+    └─ /api/yourname/** → Routes to your service (if configured)
 ```
 
-**Important**: The `/api/auth` route must be defined BEFORE the general `/api` route for proper routing.
+### Key Points
+
+1. **Single Entry Point**: Frontend only needs to know about port 8080
+2. **Centralized Routing**: `GatewayController` handles all routing logic
+3. **Authentication**: All routes (except `/api/auth/**`) require JWT token
+4. **No Frontend Changes Needed**: Vite proxy is already configured correctly
 
 ### Verify Authentication Endpoints
 
 Check `frontend/src/services/api.js` - it should use:
-- `POST /api/auth/register`
-- `POST /api/auth/login`
+- `POST /api/auth/register` → `http://localhost:8080/api/auth/register`
+- `POST /api/auth/login` → `http://localhost:8080/api/auth/login`
 
-These will proxy to `http://localhost:8080/api/auth/*`
+These are handled directly by `AuthController` in the authentication service.
 
 ---
 
@@ -633,32 +602,345 @@ export function CustomObservationForm({ isOpen, onClose, onSubmit, loading }) {
 
 | Service | Port | Endpoint Base | Purpose |
 |---------|------|---------------|---------|
-| Authentication | 8080 | `/api/auth` | Login, Register, JWT tokens |
-| Gateway | 8090 | `/api/v1` | Routes to microservices |
-| Crowdsourced | 8091 | `/api/v1/observations` | Observation CRUD |
-| Reward | 8092 | `/api/v1/rewards` | Leaderboard, rewards |
+| **Authentication Service** | 8080 | `/api/**` | Central routing hub - routes all API requests |
+| **Authentication** | 8080 | `/api/auth/**` | Login, Register, JWT tokens (handled locally) |
+| **Gateway (Oluwabusola)** | 8090 | `/api/v1/**` | Spring Cloud Gateway - routes to 8091/8092 |
+| **North East (Ridwan)** | 8081 | `/api/regions/north-east-england/**` | Direct routing |
+| **North West (Lola)** | 8082 | `/api/regions/north-west-england/**` | Direct routing |
+| **Yorkshire (Jasmine)** | 8086 | `/api/regions/yorkshire/**` | Direct routing |
+
+### Routing Flow
+
+```
+Frontend → /api/v1/observations
+    ↓
+Vite Proxy → http://localhost:8080/api/v1/observations
+    ↓
+Authentication Service (8080) → GatewayController
+    ↓
+Gateway Service (8090) → /api/v1/observations
+    ↓
+Crowdsourced Service (8091) → /api/v1/observations
+```
+
+---
+
+## 🔌 Adding Your API to GatewayController
+
+The `GatewayController` in the authentication service (port 8080) acts as the central routing hub. All frontend requests go through port 8080, which then routes to the appropriate microservices.
+
+### Quick Decision Guide
+
+| Your Situation | Recommended Option | Example Path | Effort |
+|----------------|-------------------|--------------|--------|
+| Want a dedicated API path | **Option 1: Custom Path** | `/api/yourname/**` | Medium - Add method + SecurityConfig |
+| Implementing a region dashboard | **Option 2: Region-Based** | `/api/regions/your-region/**` | Low - Just add to map |
+| Need circuit breakers/advanced routing | **Option 3: Gateway 8090** | `/api/v1/yourservice/**` | High - Configure Spring Cloud Gateway |
+
+### Current Routing Architecture
+
+```
+Frontend Request: /api/your-path
+    ↓
+Vite Proxy: → http://localhost:8080/api/your-path
+    ↓
+Authentication Service (8080): GatewayController routes based on path
+    ↓
+Your Microservice: Receives the request
+```
+
+### Option 1: Add a Custom API Path (e.g., `/api/yourname/**`)
+
+If you want a dedicated path like `/api/yourname/**` that routes directly to your service:
+
+**Step 1: Add the routing method to GatewayController.java**
+
+```java
+/**
+ * YOUR NAME'S ENDPOINT ROUTING LOGIC
+ * Routes /api/yourname/** requests directly to your service.
+ * 
+ * Pattern: /api/yourname/**
+ * 
+ * Examples:
+ * - GET /api/yourname/data → http://localhost:YOUR_PORT/api/data
+ * - POST /api/yourname/submit → http://localhost:YOUR_PORT/api/submit
+ */
+@RequestMapping(value = "/api/yourname/**", method = {RequestMethod.GET, RequestMethod.POST, 
+                                                      RequestMethod.PUT, RequestMethod.DELETE, 
+                                                      RequestMethod.PATCH, RequestMethod.OPTIONS})
+public ResponseEntity<?> routeYourNameRequest(
+        @RequestHeader(value = "Authorization", required = false) String authHeader,
+        @RequestBody(required = false) Object requestBody,
+        HttpServletRequest request) {
+    
+    HttpMethod method = HttpMethod.valueOf(request.getMethod());
+    
+    if (method == HttpMethod.OPTIONS) {
+        return ResponseEntity.ok().build();
+    }
+    
+    String requestPath = request.getRequestURI();
+    // Extract path after /api/yourname
+    int yournameIndex = requestPath.indexOf("/yourname");
+    String pathAfterYourname = requestPath.substring(yournameIndex + "/yourname".length());
+    
+    // Your service URL
+    String YOUR_SERVICE_URL = "http://localhost:YOUR_PORT"; // Replace with your port
+    String targetUrl = YOUR_SERVICE_URL + pathAfterYourname;
+    
+    // Add query parameters if any
+    String queryString = request.getQueryString();
+    if (queryString != null && !queryString.isEmpty()) {
+        targetUrl += "?" + queryString;
+    }
+    
+    return forwardRequest(targetUrl, authHeader, requestBody, method, request);
+}
+```
+
+**Step 2: Update SecurityConfig.java**
+
+Add your new path to the security configuration:
+
+```java
+.authorizeHttpRequests(auth -> auth
+    // Public endpoints
+    .requestMatchers("/api/auth/**").permitAll()
+    .requestMatchers("/h2-console/**").permitAll()
+    // Gateway routes - require authentication
+    .requestMatchers("/api/regions/**").authenticated()
+    .requestMatchers("/api/v1/**").authenticated()
+    .requestMatchers("/api/yourname/**").authenticated()  // Add this line
+    // Protected endpoints
+    .requestMatchers("/api/carbon/**").authenticated()
+    .anyRequest().authenticated()
+)
+```
+
+**Step 3: Update your frontend API service**
+
+In your `frontend/src/services/yourNameApi.js`:
+
+```javascript
+const GATEWAY_BASE = '/api/yourname'  // Use your custom path
+
+async function gatewayRequest(path, options = {}) {
+  const token = authAPI.getToken()
+  
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
+      ...options.headers
+    },
+    ...options
+  }
+  
+  const response = await fetch(`${GATEWAY_BASE}${path}`, config)
+  // ... rest of your code
+}
+```
+
+### Option 2: Add a Region-Based Route (e.g., `/api/regions/your-region/**`)
+
+If you want to use the region-based routing pattern:
+
+**Step 1: Add your region to REGION_MICROSERVICE_MAP**
+
+In `GatewayController.java`, add your region to the static map:
+
+```java
+static {
+    REGION_MICROSERVICE_MAP.put("north-east-england", "http://localhost:8081");
+    REGION_MICROSERVICE_MAP.put("north-west-england", "http://localhost:8082/api");
+    REGION_MICROSERVICE_MAP.put("east-midlands", "http://localhost:8083");
+    REGION_MICROSERVICE_MAP.put("west-midlands", "http://localhost:8084");
+    REGION_MICROSERVICE_MAP.put("south-east-england", SOUTH_EAST_GATEWAY);
+    REGION_MICROSERVICE_MAP.put("yorkshire", "http://localhost:8086/citizenscience");
+    REGION_MICROSERVICE_MAP.put("your-region-name", "http://localhost:YOUR_PORT/api");  // Add this line
+}
+```
+
+**Note**: The existing `routeRequest` method already handles all regions, so no additional routing method is needed!
+
+**Step 2: Update your frontend API service**
+
+In your `frontend/src/services/yourNameApi.js`:
+
+```javascript
+const GATEWAY_BASE = '/api/regions/your-region-name'  // Use region-based path
+
+async function gatewayRequest(path, options = {}) {
+  // ... same as above
+}
+```
+
+### Option 3: Route Through Existing Gateway (Port 8090)
+
+If you want to use the existing Spring Cloud Gateway (port 8090) like Oluwabusola does:
+
+**Step 1: Configure your service in the Gateway**
+
+Update `backend/busola/gateway/gateway/src/main/java/com/waterQualityMonitoring/gateway/GatewayApplication.java`:
+
+```java
+@Bean
+public RouteLocator customRouteLocator(RouteLocatorBuilder builder, UriConfiguration uriConfiguration) {
+    String yourServiceApi = uriConfiguration.getYourServiceApi(); // Add this to UriConfiguration
+    
+    return builder.routes()
+        // Existing routes...
+        .route("your-service", r -> r
+            .path("/api/v1/yourservice/**")
+            .filters(f -> f
+                .addRequestHeader("Gateway", "Spring Cloud Gateway")
+                .circuitBreaker(c -> c
+                    .setName("your-service-circuit-breaker")
+                    .setFallbackUri("forward:/fallback/yourservice")))
+            .uri(yourServiceApi))
+        .build();
+}
+```
+
+**Step 2: Add your service URL to UriConfiguration**
+
+In `backend/busola/gateway/gateway/src/main/java/com/waterQualityMonitoring/gateway/UriConfiguration.java`:
+
+```java
+private String yourServiceApi = "http://localhost:YOUR_PORT";
+
+public String getYourServiceApi() {
+    return yourServiceApi;
+}
+
+public void setYourServiceApi(String yourServiceApi) {
+    this.yourServiceApi = yourServiceApi;
+}
+```
+
+**Step 3: Use `/api/v1/yourservice/**` in your frontend**
+
+```javascript
+const GATEWAY_BASE = '/api/v1/yourservice'
+```
+
+### Complete Example: Adding a Custom API Path
+
+Here's a complete example for adding `/api/weather/**` that routes to a weather service on port 8085:
+
+**1. GatewayController.java - Add this method:**
+
+```java
+/**
+ * Weather Service Routing
+ * Routes /api/weather/** requests to Weather Service (port 8085).
+ * 
+ * Pattern: /api/weather/**
+ * 
+ * Examples:
+ * - GET /api/weather/forecast → http://localhost:8085/api/forecast
+ * - GET /api/weather/current → http://localhost:8085/api/current
+ */
+@RequestMapping(value = "/api/weather/**", method = {RequestMethod.GET, RequestMethod.POST, 
+                                                    RequestMethod.PUT, RequestMethod.DELETE, 
+                                                    RequestMethod.PATCH, RequestMethod.OPTIONS})
+public ResponseEntity<?> routeWeatherRequest(
+        @RequestHeader(value = "Authorization", required = false) String authHeader,
+        @RequestBody(required = false) Object requestBody,
+        HttpServletRequest request) {
+    
+    HttpMethod method = HttpMethod.valueOf(request.getMethod());
+    
+    if (method == HttpMethod.OPTIONS) {
+        return ResponseEntity.ok().build();
+    }
+    
+    String requestPath = request.getRequestURI();
+    int weatherIndex = requestPath.indexOf("/weather");
+    String pathAfterWeather = requestPath.substring(weatherIndex + "/weather".length());
+    
+    String WEATHER_SERVICE = "http://localhost:8085";
+    String targetUrl = WEATHER_SERVICE + pathAfterWeather;
+    
+    String queryString = request.getQueryString();
+    if (queryString != null && !queryString.isEmpty()) {
+        targetUrl += "?" + queryString;
+    }
+    
+    return forwardRequest(targetUrl, authHeader, requestBody, method, request);
+}
+```
+
+**2. SecurityConfig.java - Add this line:**
+
+```java
+.requestMatchers("/api/weather/**").authenticated()  // Add after /api/v1/**
+```
+
+**3. Frontend service - Use this:**
+
+```javascript
+const GATEWAY_BASE = '/api/weather'
+
+// Then use: gatewayRequest('/forecast') → /api/weather/forecast → http://localhost:8085/api/forecast
+```
+
+### Important Notes
+
+1. **Path Order Matters**: More specific paths should be defined before general ones. Spring matches the first pattern that fits.
+
+2. **Authentication Required**: All routes except `/api/auth/**` require a valid JWT token. Make sure your frontend includes the `Authorization: Bearer <token>` header.
+
+3. **CORS**: CORS is already configured for `http://localhost:3000` and `http://localhost:5173`. If you need additional origins, update `CorsConfig.java`.
+
+4. **Error Handling**: The `forwardRequest` method handles errors automatically. Connection errors will return a 502 Bad Gateway with a helpful message.
+
+5. **Path Transformation**: 
+   - `/api/yourname/data` → `http://localhost:YOUR_PORT/api/data` (removes `/yourname`)
+   - `/api/regions/your-region/data` → `http://localhost:YOUR_PORT/api/data` (removes `/api/regions/your-region`)
+
+### Quick Reference: Which Option to Choose?
+
+- **Option 1 (Custom Path)**: Use if you want a dedicated path like `/api/yourname/**`
+- **Option 2 (Region-Based)**: Use if you're implementing a region-specific dashboard
+- **Option 3 (Gateway 8090)**: Use if you want to leverage the Spring Cloud Gateway with circuit breakers and advanced routing
 
 ---
 
 ##   Checklist for Adding Your Dashboard
 
+### Backend Setup
+- [ ] Decide on routing pattern (Custom Path / Region-Based / Gateway 8090)
+- [ ] Add routing method to `GatewayController.java` (if custom path)
+- [ ] Add region to `REGION_MICROSERVICE_MAP` (if region-based)
+- [ ] Update `SecurityConfig.java` to allow your API path
+- [ ] Configure your microservice to run on a specific port
+- [ ] Test routing with `curl` or Postman
+
+### Frontend Setup
 - [ ] Create API service file (`yourNameApi.js`)
 - [ ] Create dashboard page component (`YourNameDashboard.jsx`)
 - [ ] Add route to `App.jsx`
-- [ ] Verify Vite proxy configuration
+- [ ] Verify Vite proxy configuration (should already be set to port 8080)
 - [ ] Test authentication flow
-- [ ] Test observation creation
 - [ ] Test data fetching
-- [ ] Customize form fields if needed
 - [ ] Test error handling
 - [ ] Verify CORS is working
+
+### Testing
+- [ ] Test GET requests
+- [ ] Test POST/PUT/DELETE requests
+- [ ] Test with valid JWT token
+- [ ] Test with invalid/expired token (should redirect to login)
+- [ ] Test error scenarios (service down, network errors)
 
 ---
 
 ## 🐛 Common Issues & Solutions
 
 ### 1. "Failed to fetch" Error
-- **Solution**: Ensure gateway (8090), crowdsourced (8091), and reward (8092) services are running
+- **Solution**: Ensure gateway (your gatewayport), crowdsourced (your crowdsource port), and reward (rewardport) services are running
 - Check CORS configuration in gateway
 - Verify Vite proxy settings
 
