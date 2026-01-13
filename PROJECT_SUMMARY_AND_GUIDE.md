@@ -1,6 +1,6 @@
 # Project Summary & Implementation Guide
 
-## 📋 Summary of All Changes Made
+## Summary of All Changes Made
 
 ### 1. Backend Structure Added
 - **Authentication Service** (Port 8080)
@@ -64,7 +64,220 @@
 
 ---
 
-## 🚀 Step-by-Step Guide: Adding Your Dashboard
+## Project Folder Structure
+
+### Root Directory
+```
+citizen-observation-dashboard/
+├── backend/                    # Backend services (Spring Boot)
+│   ├── authentication/         # Authentication service (Port 8080)
+│   └── busola/                # Oluwabusola's microservices
+│       ├── crowdsourced/      # Crowdsourced service (Port 8091)
+│       ├── gateway/           # Spring Cloud Gateway (Port 8090)
+│       └── reward/            # Reward service (Port 8092)
+├── frontend/                   # Frontend application (React + Vite)
+├── PROJECT_SUMMARY_AND_GUIDE.md
+├── README.md
+└── COMPONENTS_USAGE.md
+```
+
+### Backend Structure
+
+#### Authentication Service (`backend/authentication/`)
+```
+authentication/
+├── pom.xml
+├── src/
+│   └── main/
+│       ├── java/
+│       │   └── com/carbon/dashboard/
+│       │       ├── CarbonDashboardApplication.java
+│       │       ├── config/
+│       │       │   └── CorsConfig.java          # CORS & RestTemplate config
+│       │       ├── controller/
+│       │       │   ├── AuthController.java     # /api/auth/** endpoints
+│       │       │   ├── GatewayController.java  # Central routing hub
+│       │       │   └── CarbonIntensityController.java
+│       │       ├── dto/                        # Data Transfer Objects
+│       │       │   ├── AuthResponse.java
+│       │       │   ├── LoginRequest.java
+│       │       │   ├── RegisterRequest.java
+│       │       │   └── UserResponse.java
+│       │       ├── exception/
+│       │       │   └── GlobalExceptionHandler.java
+│       │       ├── model/
+│       │       │   └── User.java
+│       │       ├── repository/
+│       │       │   └── UserRepository.java
+│       │       ├── security/
+│       │       │   ├── JwtAuthenticationFilter.java
+│       │       │   ├── JwtUtil.java
+│       │       │   └── SecurityConfig.java     # Security & route permissions
+│       │       └── service/
+│       │           ├── CarbonIntensityService.java
+│       │           └── UserService.java
+│       └── resources/
+│           └── application.properties           # Port 8080, DB config
+└── target/                                      # Compiled classes (ignore)
+```
+
+**Key Files:**
+- `GatewayController.java` - **Central routing hub** - routes all API requests
+- `SecurityConfig.java` - Defines which routes require authentication
+- `CorsConfig.java` - CORS configuration and RestTemplate bean
+
+#### Busola Microservices (`backend/busola/`)
+
+**Gateway Service** (`backend/busola/gateway/gateway/`)
+```
+gateway/gateway/
+├── pom.xml
+└── src/main/
+    ├── java/com/waterQualityMonitoring/gateway/
+    │   ├── GatewayApplication.java            # Main app + route configuration
+    │   ├── UriConfiguration.java             # Service URLs
+    │   └── FallbackController.java            # Circuit breaker fallbacks
+    └── resources/
+        └── application.properties             # Port 8090 config
+```
+
+**Crowdsourced Service** (`backend/busola/crowdsourced/`)
+```
+crowdsourced/
+├── pom.xml
+├── data/
+│   └── crowdsourced.db                        # SQLite database
+└── src/main/
+    ├── java/com/waterQualityMonitoring/crowdsourced/
+    │   ├── CrowdsourcedApplication.java
+    │   ├── controller/                        # REST controllers
+    │   ├── model/                             # Entity models
+    │   ├── repository/                        # Data repositories
+    │   └── service/                           # Business logic
+    └── resources/
+        └── application.properties              # Port 8091 config
+```
+
+**Reward Service** (`backend/busola/reward/reward/`)
+```
+reward/reward/
+├── pom.xml
+├── data/
+│   └── reward.db                              # SQLite database
+└── src/main/
+    ├── java/com/waterQualityMonitoring/reward/
+    │   ├── RewardApplication.java
+    │   ├── controller/                        # REST controllers
+    │   ├── model/                             # Entity models
+    │   ├── repository/                        # Data repositories
+    │   └── service/                           # Business logic
+    └── resources/
+        └── application.properties              # Port 8092 config
+```
+
+### Frontend Structure (`frontend/`)
+
+```
+frontend/
+├── package.json
+├── vite.config.js                             # Vite config + proxy setup
+├── index.html
+└── src/
+    ├── main.jsx                               # React entry point
+    ├── App.jsx                                # Main app component + routes
+    ├── App.css
+    ├── index.css
+    ├── assets/
+    │   └── react.svg
+    ├── components/                            # Reusable components (Atomic Design)
+    │   ├── index.js                           # Central export file
+    │   ├── atoms/                             # Basic building blocks
+    │   │   ├── index.js
+    │   │   ├── Button.jsx
+    │   │   ├── Input.jsx
+    │   │   ├── Textarea.jsx
+    │   │   ├── Select.jsx
+    │   │   └── NumberInput.jsx
+    │   ├── molecules/                         # Simple component groups
+    │   │   ├── index.js
+    │   │   ├── Card.jsx
+    │   │   ├── FormController.jsx             # Form field wrapper
+    │   │   └── StatCard.jsx
+    │   ├── organisms/                         # Complex components
+    │   │   ├── index.js
+    │   │   ├── Modal.jsx
+    │   │   ├── ObservationForm.jsx            # Full observation form
+    │   │   ├── ObservationList.jsx
+    │   │   ├── Leaderboard.jsx
+    │   │   └── Breadcrumb.jsx
+    │   └── templates/                         # Page-level components
+    │       ├── index.js
+    │       ├── ProtectedRoute.jsx             # Auth wrapper
+    │       └── RidwanDashboard.jsx
+    ├── pages/                                 # Page components
+    │   ├── Login.jsx
+    │   ├── Register.jsx
+    │   ├── Hub.jsx                            # Main hub/dashboard selector
+    │   ├── OluwabusolaDashboard.jsx           # South East England
+    │   ├── LolaDashboard.jsx                  # North West England
+    │   ├── JasmineDashboard.jsx               # Yorkshire
+    │   └── DashboardTemplate.jsx              # Generic template
+    └── services/                              # API service files
+        ├── api.js                             # Authentication API (port 8080)
+        ├── oluwabusolaApi.js                  # South East API (via gateway 8090)
+        ├── lolaApi.js                         # North West API (port 8082)
+        └── jasmineApi.js                      # Yorkshire API (port 8086)
+```
+
+### Component Organization (Atomic Design)
+
+The frontend follows **Atomic Design** principles:
+
+1. **Atoms** (`components/atoms/`) - Basic, indivisible components
+   - `Button`, `Input`, `Textarea`, `Select`, `NumberInput`
+   - Cannot be broken down further
+   - Highly reusable
+
+2. **Molecules** (`components/molecules/`) - Simple combinations of atoms
+   - `Card`, `FormController`, `StatCard`
+   - Groups of atoms working together
+   - Still reusable but more specific
+
+3. **Organisms** (`components/organisms/`) - Complex UI components
+   - `Modal`, `ObservationForm`, `ObservationList`, `Leaderboard`
+   - Complete functional sections
+   - May be page-specific but still reusable
+
+4. **Templates** (`components/templates/`) - Page-level layouts
+   - `ProtectedRoute`, `RidwanDashboard`
+   - Define page structure
+   - Less reusable, more context-specific
+
+### Key File Locations
+
+| What You Need | File Location |
+|---------------|---------------|
+| **Add new API route** | `backend/authentication/.../GatewayController.java` |
+| **Update security rules** | `backend/authentication/.../SecurityConfig.java` |
+| **Configure CORS** | `backend/authentication/.../CorsConfig.java` |
+| **Add frontend API service** | `frontend/src/services/yourNameApi.js` |
+| **Add new page** | `frontend/src/pages/YourNameDashboard.jsx` |
+| **Add route to app** | `frontend/src/App.jsx` |
+| **Create reusable component** | `frontend/src/components/[atoms|molecules|organisms]/` |
+| **Vite proxy config** | `frontend/vite.config.js` |
+| **Gateway routes (8090)** | `backend/busola/gateway/gateway/.../GatewayApplication.java` |
+
+### Important Notes
+
+- **Backend**: Each service is a separate Spring Boot application with its own `pom.xml`
+- **Frontend**: Single React application with all dashboards in one codebase
+- **Database**: Each service may have its own database (SQLite for crowdsourced/reward, H2 for auth)
+- **Target folders**: Generated build artifacts - can be ignored/cleaned with `mvn clean`
+- **Node modules**: Frontend dependencies - can be regenerated with `npm install`
+
+---
+
+##  Step-by-Step Guide: Adding Your Dashboard
 
 ### Step 1: Create Your API Service File
 
@@ -350,7 +563,7 @@ export function YourNameDashboard() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
         <div style={{ flex: 1 }}>
           <h1 style={{ marginBottom: '8px' }}>
-            Your Name Dashboard 💧📊
+            Your Name Dashboard
           </h1>
           <p style={{ color: '#6b7280', marginBottom: 0 }}>
             Water quality monitoring dashboard with crowdsourced observations and rewards
@@ -360,7 +573,7 @@ export function YourNameDashboard() {
           onClick={() => setIsFormOpen(true)}
           variant="success"
         >
-          ➕ Add Observation
+          Add Observation
         </Button>
       </div>
       
@@ -374,17 +587,17 @@ export function YourNameDashboard() {
         <StatCard 
           label="Total Observations" 
           value={data.totalCount}
-          icon="📊"
+          icon=""
         />
         <StatCard 
           label="Recent Submissions" 
           value={data.recentObservations.length}
-          icon="📝"
+          icon=""
         />
         <StatCard 
           label="Active Contributors" 
           value={data.leaderboard.length}
-          icon="👥"
+          icon=""
         />
       </div>
       
@@ -410,7 +623,7 @@ export function YourNameDashboard() {
           onClick={fetchDashboardData}
           variant="primary"
         >
-          🔄 Refresh Data
+          Refresh Data
         </Button>
         
         <Button 
@@ -429,7 +642,7 @@ export function YourNameDashboard() {
           disabled={loading}
           variant="success"
         >
-          🏆 Calculate Rewards
+          Calculate Rewards
         </Button>
       </div>
 
@@ -478,7 +691,7 @@ import { YourNameDashboard } from './pages/YourNameDashboard'
 
 ---
 
-## 🔧 Current Architecture Overview
+## Current Architecture Overview
 
 ### Centralized Routing Through Authentication Service
 
@@ -513,7 +726,7 @@ These are handled directly by `AuthController` in the authentication service.
 
 ---
 
-## 🎨 Customizing the Observation Form
+## Customizing the Observation Form
 
 The `ObservationForm` component is already created and reusable. It includes:
 
@@ -598,7 +811,7 @@ export function CustomObservationForm({ isOpen, onClose, onSubmit, loading }) {
 
 ---
 
-## 📝 Port Configuration Summary
+## Port Configuration Summary
 
 | Service | Port | Endpoint Base | Purpose |
 |---------|------|---------------|---------|
@@ -625,7 +838,7 @@ Crowdsourced Service (8091) → /api/v1/observations
 
 ---
 
-## 🔌 Adding Your API to GatewayController
+## Adding Your API to GatewayController
 
 The `GatewayController` in the authentication service (port 8080) acts as the central routing hub. All frontend requests go through port 8080, which then routes to the appropriate microservices.
 
@@ -937,7 +1150,7 @@ const GATEWAY_BASE = '/api/weather'
 
 ---
 
-## 🐛 Common Issues & Solutions
+## Common Issues & Solutions
 
 ### 1. "Failed to fetch" Error
 - **Solution**: Ensure gateway (your gatewayport), crowdsourced (your crowdsource port), and reward (rewardport) services are running
@@ -960,7 +1173,7 @@ const GATEWAY_BASE = '/api/weather'
 
 ---
 
-## 📚 Additional Resources
+## Additional Resources
 
 - Component usage guide: See `COMPONENTS_USAGE.md`
 - React Hook Form docs: https://react-hook-form.com/

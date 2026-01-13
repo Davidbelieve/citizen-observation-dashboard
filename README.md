@@ -73,37 +73,5 @@ Each dashboard needs these endpoints:
 | North West | Lola | 8082 |
 | East Midlands | [Name] | 8083 |
 | West Midlands | [Name] | 8084 |
-| South East | Oluwabusola | 8085 |
+| South East | Oluwabusola | 8090 |
 | Yorkshire and the Humber | Jasmine | 8086 |
-
-
-#Folder Structure
-components/
-├── atoms/              # Basic building blocks
-│   ├── Button.jsx
-│   ├── Input.jsx
-│   ├── Textarea.jsx
-│   ├── Select.jsx
-│   ├── NumberInput.jsx
-│   └── index.js
-│
-├── molecules/          # Simple combinations of atoms
-│   ├── FormController.jsx
-│   ├── Card.jsx
-│   ├── StatCard.jsx
-│   └── index.js
-│
-├── organisms/          # Complex components
-│   ├── Modal.jsx
-│   ├── ObservationForm.jsx
-│   ├── ObservationList.jsx
-│   ├── Leaderboard.jsx
-│   ├── Breadcrumb.jsx
-│   └── index.js
-│
-├── templates/          # Page-level components
-│   ├── RidwanDashboard.jsx
-│   ├── ProtectedRoute.jsx
-│   └── index.js
-│
-└── index.js            # Central export point
