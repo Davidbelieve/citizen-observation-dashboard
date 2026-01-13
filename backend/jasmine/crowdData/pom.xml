@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.citizenscience</groupId>
-	<artifactId>rewards</artifactId>
+	<artifactId>CrowdData</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>rewards</name>
-	<description>Rewards Service for Citizen Science</description>
+	<name>CrowdData</name>
+	<description>Crowdsourced Data Service for Citizen Science</description>
 	<url/>
 	<licenses>
 		<license/>
