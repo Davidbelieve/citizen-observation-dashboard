@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Card } from '../components/Card'
-import { StatCard } from '../components/StatCard'
-import { ObservationList } from '../components/ObservationList'
-import { Leaderboard } from '../components/Leaderboard'
+import { Card, StatCard, ObservationList, Leaderboard, Breadcrumb, ObservationForm } from '../components'
 import { lolaAPI } from '../services/lolaApi'
 
 export function LolaDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const [data, setData] = useState({
     totalCount: 0,
     recentObservations: [],
@@ -85,6 +84,20 @@ export function LolaDashboard() {
       </div>
     )
   }
+
+  const handleSubmitObservation = async (observationData) => {
+    setSubmitting(true)
+    try {
+      await lolaAPI.createObservation(observationData)
+      alert('Observation submitted successfully!')
+      fetchDashboardData() // Refresh the dashboard
+    } catch (err) {
+      alert('Error submitting observation: ' + err.message)
+      throw err
+    } finally {
+      setSubmitting(false)
+    }
+  }
   
   return (
     <div style={{ 
@@ -94,12 +107,37 @@ export function LolaDashboard() {
       backgroundColor: '#f3f4f6',
       minHeight: '100vh'
     }}>
-      <h1 style={{ marginBottom: '8px' }}>
-        North West England Dashboard 🏭💧
-      </h1>
-      <p style={{ color: '#6b7280', marginBottom: '24px' }}>
-        Water quality monitoring for Greater Manchester, Merseyside, Lancashire, and Cheshire
-      </p>
+      <Breadcrumb currentPage="North West England Dashboard" />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+        <div style={{ flex: 1 }}>
+          <h1 style={{ marginBottom: '8px' }}>
+            North West England Dashboard 🏭💧
+          </h1>
+          <p style={{ color: '#6b7280', marginBottom: 0 }}>
+            Water quality monitoring for Greater Manchester, Merseyside, Lancashire, and Cheshire
+          </p>
+        </div>
+        <button
+          onClick={() => setIsFormOpen(true)}
+          style={{
+            padding: '12px 24px',
+            backgroundColor: '#10b981',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '600',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            transition: 'background-color 0.2s',
+            whiteSpace: 'nowrap'
+          }}
+          onMouseEnter={(e) => e.target.style.backgroundColor = '#059669'}
+          onMouseLeave={(e) => e.target.style.backgroundColor = '#10b981'}
+        >
+          ➕ Add Observation
+        </button>
+      </div>
       
       <div style={{ 
         display: 'grid', 
@@ -153,6 +191,13 @@ export function LolaDashboard() {
       >
         🔄 Refresh Data
       </button>
+
+      <ObservationForm
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        onSubmit={handleSubmitObservation}
+        loading={submitting}
+      />
     </div>
   )
 }

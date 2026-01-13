@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { Card } from '../components/Card'
-import { StatCard } from '../components/StatCard'
-import { ObservationList } from '../components/ObservationList'
-import { Leaderboard } from '../components/Leaderboard'
+import { Card, StatCard, ObservationList, Leaderboard, Breadcrumb, ObservationForm } from '../components'
 import { dashboardAPI } from '../services/api'
 
 export function DashboardTemplate() {
   const { region } = useParams()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const [data, setData] = useState({
     totalCount: 0,
     recentObservations: [],
@@ -89,6 +88,20 @@ export function DashboardTemplate() {
   }
   
   const regionName =  region.replace(/-/g, ' ')
+
+  const handleSubmitObservation = async (observationData) => {
+    setSubmitting(true)
+    try {
+      await dashboardAPI.createObservation(region, observationData)
+      alert('Observation submitted successfully!')
+      fetchDashboardData() // Refresh the dashboard
+    } catch (err) {
+      alert('Error submitting observation: ' + err.message)
+      throw err
+    } finally {
+      setSubmitting(false)
+    }
+  }
   
   return (
     <div style={{ 
@@ -98,15 +111,40 @@ export function DashboardTemplate() {
       backgroundColor: '#f3f4f6',
       minHeight: '100vh'
     }}>
-      <h1 style={{ 
-        textTransform: 'capitalize', 
-        marginBottom: '8px' 
-      }}>
-        {regionName} Dashboard
-      </h1>
-      <p style={{ color: '#6b7280', marginBottom: '24px' }}>
-        Real-time citizen observation data
-      </p>
+      <Breadcrumb currentPage={`${regionName} Dashboard`} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+        <div style={{ flex: 1 }}>
+          <h1 style={{ 
+            textTransform: 'capitalize', 
+            marginBottom: '8px' 
+          }}>
+            {regionName} Dashboard
+          </h1>
+          <p style={{ color: '#6b7280', marginBottom: 0 }}>
+            Real-time citizen observation data
+          </p>
+        </div>
+        <button
+          onClick={() => setIsFormOpen(true)}
+          style={{
+            padding: '12px 24px',
+            backgroundColor: '#10b981',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '600',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            transition: 'background-color 0.2s',
+            whiteSpace: 'nowrap'
+          }}
+          onMouseEnter={(e) => e.target.style.backgroundColor = '#059669'}
+          onMouseLeave={(e) => e.target.style.backgroundColor = '#10b981'}
+        >
+          ➕ Add Observation
+        </button>
+      </div>
       
       <div style={{ 
         display: 'grid', 
@@ -160,6 +198,13 @@ export function DashboardTemplate() {
       >
         🔄 Refresh Data
       </button>
+
+      <ObservationForm
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        onSubmit={handleSubmitObservation}
+        loading={submitting}
+      />
     </div>
   )
 }

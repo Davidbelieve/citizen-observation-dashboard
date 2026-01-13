@@ -1,19 +1,18 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { Card } from '../components/Card'
-import { StatCard } from '../components/StatCard'
-import { ObservationList } from '../components/ObservationList'
-import { Leaderboard } from '../components/Leaderboard'
+import { Card, StatCard, ObservationList, Leaderboard, Breadcrumb, ObservationForm } from '../components'
 import { jasmineAPI } from '../services/jasmineApi'
 
 export function JasmineDashboard() {
   const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
-    const [data, setData] = useState({
-      totalCount: 0,
-      recentObservations: [],
-      leaderboard: []
-    })
+  const [error, setError] = useState(null)
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [data, setData] = useState({
+    totalCount: 0,
+    recentObservations: [],
+    leaderboard: []
+  })
     
     useEffect(() => {
       fetchDashboardData()
@@ -86,6 +85,20 @@ export function JasmineDashboard() {
       </div>
     )
   }
+
+  const handleSubmitObservation = async (observationData) => {
+    setSubmitting(true)
+    try {
+      await jasmineAPI.createObservation(observationData)
+      alert('Observation submitted successfully!')
+      fetchDashboardData() // Refresh the dashboard
+    } catch (err) {
+      alert('Error submitting observation: ' + err.message)
+      throw err
+    } finally {
+      setSubmitting(false)
+    }
+  }
     
     return (
       <div style={{ 
@@ -95,12 +108,37 @@ export function JasmineDashboard() {
       backgroundColor: '#CCD6E6',
       minHeight: '100vh'
     }}>
-      <h1 style={{ marginBottom: '8px' }}>
-        Yorkshire and the Humber Dashboard 🏵🐑
-      </h1>
-      <p style={{ color: '#41414D', marginBottom: '24px' }}>
-        Water quality monitoring for North Yorkshire, East Yorkshire, Northern Lincolnshire, West Yorkshire, and South Yorkshire
-      </p>
+      <Breadcrumb currentPage="Yorkshire and the Humber Dashboard" />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+        <div style={{ flex: 1 }}>
+          <h1 style={{ marginBottom: '8px' }}>
+            Yorkshire and the Humber Dashboard 🏵🐑
+          </h1>
+          <p style={{ color: '#41414D', marginBottom: 0 }}>
+            Water quality monitoring for North Yorkshire, East Yorkshire, Northern Lincolnshire, West Yorkshire, and South Yorkshire
+          </p>
+        </div>
+        <button
+          onClick={() => setIsFormOpen(true)}
+          style={{
+            padding: '12px 24px',
+            backgroundColor: '#10b981',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '600',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            transition: 'background-color 0.2s',
+            whiteSpace: 'nowrap'
+          }}
+          onMouseEnter={(e) => e.target.style.backgroundColor = '#059669'}
+          onMouseLeave={(e) => e.target.style.backgroundColor = '#10b981'}
+        >
+          ➕ Add Observation
+        </button>
+      </div>
       
       <div style={{ 
         display: 'grid', 
@@ -155,6 +193,13 @@ export function JasmineDashboard() {
       >
         🔄 Refresh Data
       </button>
+
+      <ObservationForm
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        onSubmit={handleSubmitObservation}
+        loading={submitting}
+      />
     </div>
   )
 }

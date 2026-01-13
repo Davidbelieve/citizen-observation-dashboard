@@ -1,0 +1,5 @@
+package com.waterQualityMonitoring.crowdsourced.controller;
+
+public class CrowdsourcedController {
+
+}
