@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
-import { Card } from '../components/Card'
-import { StatCard } from '../components/StatCard'
-import { ObservationList } from '../components/ObservationList'
-import { Leaderboard } from '../components/Leaderboard'
-import { dashboardAPI } from '../services/api'
+import { useParams, useNavigate } from 'react-router-dom'
+import { Card } from '../components/molecules/Card'
+import { StatCard } from '../components/molecules/StatCard'
+import { ObservationList } from '../components/organisms/ObservationList'
+import { Leaderboard } from '../components/organisms/Leaderboard'
 
 export function DashboardTemplate() {
   const { region } = useParams()
+  const navigate = useNavigate()
+  
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [data, setData] = useState({
@@ -15,6 +16,17 @@ export function DashboardTemplate() {
     recentObservations: [],
     leaderboard: []
   })
+  
+  const getPortsForRegion = (regionName) => {
+    const portConfig = {
+      'north-east-england': { data: 8091, rewards: 8092 },
+      'north-west-england': { data: 8093, rewards: 8094 },
+      'east-midlands': { data: 8095, rewards: 8096 },
+      'west-midlands': { data: 8097, rewards: 8098 },
+      'south-east-england': { data: 8099, rewards: 8100 }
+    }
+    return portConfig[regionName] || { data: 8091, rewards: 8092 }
+  }
   
   useEffect(() => {
     fetchDashboardData()
@@ -25,17 +37,89 @@ export function DashboardTemplate() {
     setError(null)
     
     try {
-      const [countData, observationsData, leaderboardData] = await Promise.all([
-        dashboardAPI.getTotalCount(region),
-        dashboardAPI.getRecentObservations(region, 5),
-        dashboardAPI.getLeaderboard(region, 3)
-      ])
+      const ports = getPortsForRegion(region)
+      const DATA_API = `http://localhost:${ports.data}`
+      const REWARDS_API = `http://localhost:${ports.rewards}`
+      
+      console.log(`Fetching ${region} from ports ${ports.data}, ${ports.rewards}`)
+      
+      // Fetch observations
+      const observationsResponse = await fetch(`${DATA_API}/api/observations`)
+      if (!observationsResponse.ok) throw new Error(`Data service unavailable`)
+      const observationsData = await observationsResponse.json()
+      
+      // Map observations with proper date conversion
+      const mappedObservations = observationsData.map(obs => {
+        let timestamp
+        if (Array.isArray(obs.submissionTimestamp)) {
+          // Convert Java LocalDateTime array [year, month, day, hour, min, sec, nano]
+          timestamp = new Date(
+            obs.submissionTimestamp[0],      // year
+            obs.submissionTimestamp[1] - 1,  // month (0-indexed in JS)
+            obs.submissionTimestamp[2],      // day
+            obs.submissionTimestamp[3] || 0, // hour
+            obs.submissionTimestamp[4] || 0, // minute
+            obs.submissionTimestamp[5] || 0  // second
+          )
+        } else {
+          timestamp = new Date(obs.submissionTimestamp)
+        }
+        
+        return {
+          id: obs.id,
+          postcode: obs.postcode,
+          citizenId: obs.citizenId,
+          timestamp: timestamp.toISOString(),
+          formattedTimestamp: timestamp.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          observation: obs.observations ? obs.observations.join(', ') : 'N/A',
+          measurements: {
+            temperature: obs.temperature,
+            ph: obs.ph,
+            turbidity: obs.turbidity,
+            alkalinity: obs.alkalinity
+          }
+        }
+      })
+      
+      const sortedObservations = mappedObservations.sort((a, b) => {
+        return new Date(b.timestamp) - new Date(a.timestamp)
+      })
+      
+      // Fetch leaderboard
+      const leaderboardResponse = await fetch(`${REWARDS_API}/api/rewards/leaderboard?limit=3`)
+      if (!leaderboardResponse.ok) throw new Error(`Rewards service unavailable`)
+      const leaderboardData = await leaderboardResponse.json()
+      
+      // Map leaderboard to match component expectations
+      const mappedLeaderboard = leaderboardData.map(contributor => ({
+        id: contributor.citizenId,
+        username: contributor.citizenId,
+        points: contributor.totalPoints,
+        totalPoints: contributor.totalPoints,
+        count: contributor.totalObservations,
+        totalObservations: contributor.totalObservations,
+        rank: contributor.rank,
+        badge: contributor.currentBadge
+      }))
       
       setData({
-        totalCount: countData.count || 0,
-        recentObservations: observationsData.observations || [],
-        leaderboard: leaderboardData.contributors || []
+        totalCount: observationsData.length,
+        recentObservations: sortedObservations.slice(0, 5),
+        leaderboard: mappedLeaderboard
       })
+      
+      console.log('✅ Data loaded:', {
+        total: observationsData.length,
+        observations: sortedObservations.length,
+        leaderboard: mappedLeaderboard
+      })
+      
     } catch (err) {
       setError(err.message)
       console.error('Dashboard fetch error:', err)
@@ -88,7 +172,7 @@ export function DashboardTemplate() {
     )
   }
   
-  const regionName =  region.replace(/-/g, ' ')
+  const regionName = region.replace(/-/g, ' ')
   
   return (
     <div style={{ 
@@ -98,15 +182,35 @@ export function DashboardTemplate() {
       backgroundColor: '#f3f4f6',
       minHeight: '100vh'
     }}>
-      <h1 style={{ 
-        textTransform: 'capitalize', 
-        marginBottom: '8px' 
-      }}>
-        {regionName} Dashboard
-      </h1>
-      <p style={{ color: '#6b7280', marginBottom: '24px' }}>
-        Real-time citizen observation data
-      </p>
+      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h1 style={{ 
+            textTransform: 'capitalize', 
+            marginBottom: '8px',
+            fontSize: '32px',
+            fontWeight: 'bold'
+          }}>
+            {regionName} Dashboard
+          </h1>
+          <p style={{ color: '#6b7280', marginBottom: '0' }}>
+            Real-time citizen observation data
+          </p>
+        </div>
+        <button
+          onClick={() => navigate('/hub')}
+          style={{
+            padding: '10px 20px',
+            backgroundColor: '#2563eb',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontWeight: '500'
+          }}
+        >
+          ← Back to Hub
+        </button>
+      </div>
       
       <div style={{ 
         display: 'grid', 
