@@ -98,33 +98,7 @@ export function Hub() {
             Help protect public health and preserve aquatic ecosystems by contributing water quality observations. 
             Your data helps identify pollution events and supports sustainable water management across England.
           </p>
-          <button
-            onClick={() => navigate('/submit')}
-            style={{
-              padding: '14px 32px',
-              backgroundColor: '#2563eb',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              boxShadow: '0 4px 6px rgba(37, 99, 235, 0.3)',
-              transition: 'all 0.3s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#1d4ed8'
-              e.currentTarget.style.transform = 'translateY(-2px)'
-              e.currentTarget.style.boxShadow = '0 6px 12px rgba(37, 99, 235, 0.4)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#2563eb'
-              e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.style.boxShadow = '0 4px 6px rgba(37, 99, 235, 0.3)'
-            }}
-          >
-            📝 Submit Observation
-          </button>
+          
         </div>
 
         {/* Regional Dashboards Section */}

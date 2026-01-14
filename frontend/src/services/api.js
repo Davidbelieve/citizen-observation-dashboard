@@ -1,5 +1,5 @@
 // Mock mode - set to false when real backend is ready
-const USE_MOCK_DATA = true
+const USE_MOCK_DATA = false
 
 // Unified API Base URL - All requests go through authentication gateway
 const API_BASE_URL = '/api'
