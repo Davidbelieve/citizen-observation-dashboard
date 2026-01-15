@@ -1,0 +1,111 @@
+package com.waterquality.gateway.controller;
+
+//Necessary imports
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.HttpClientErrorException;
+import jakarta.servlet.http.HttpServletRequest;
+
+@RestController
+@RequestMapping("/api")
+public class GatewayController {
+    
+    private final RestTemplate restTemplate;
+    
+    //Service URLs
+    private static final String CROWDSOURCED_SERVICE = "http://localhost:8081";
+    private static final String REWARDS_SERVICE = "http://localhost:8082";
+    
+    public GatewayController() {
+        this.restTemplate = new RestTemplate();
+    }
+    
+    //Route all /api/observations/** to Crowdsourced Service (port 8081)
+    @RequestMapping(value = "/observations/**", 
+                    method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE})
+    public ResponseEntity<?> routeToCrowdsourced(
+            HttpServletRequest request,
+            @RequestBody(required = false) Object body) {
+        
+        try {
+            // Get the full path after /api
+            String path = request.getRequestURI().replace("/api", "");
+            
+            // Build full URL
+            String url = CROWDSOURCED_SERVICE + path;
+            
+            // Get query string if present
+            if (request.getQueryString() != null) {
+                url += "?" + request.getQueryString();
+            }
+            
+            // Get HTTP method
+            HttpMethod method = HttpMethod.valueOf(request.getMethod());
+            
+            // Create headers and copy Content-Type
+            HttpHeaders headers = new HttpHeaders();
+            if (request.getContentType() != null) {
+                headers.setContentType(MediaType.parseMediaType(request.getContentType()));
+            }
+            
+            // Create request entity with body and headers
+            HttpEntity<Object> requestEntity = new HttpEntity<>(body, headers);
+            
+            // Forward request
+            return restTemplate.exchange(url, method, requestEntity, Object.class);
+            
+        } catch (HttpClientErrorException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Gateway error: " + e.getMessage());
+        }
+    }
+    
+    //Route all /api/rewards/** to Rewards Service (port 8082)
+    @RequestMapping(value = "/rewards/**", 
+                    method = {RequestMethod.GET, RequestMethod.POST})
+    public ResponseEntity<?> routeToRewards(
+            HttpServletRequest request,
+            @RequestBody(required = false) Object body) {
+        
+        try {
+            // Get the full path after /api
+            String path = request.getRequestURI().replace("/api", "");
+            
+            // Build full URL
+            String url = REWARDS_SERVICE + path;
+            
+            // Get query string if present
+            if (request.getQueryString() != null) {
+                url += "?" + request.getQueryString();
+            }
+            
+            // Get HTTP method
+            HttpMethod method = HttpMethod.valueOf(request.getMethod());
+            
+            // Create headers and copy Content-Type
+            HttpHeaders headers = new HttpHeaders();
+            if (request.getContentType() != null) {
+                headers.setContentType(MediaType.parseMediaType(request.getContentType()));
+            }
+            
+            // Create request entity with body and headers
+            HttpEntity<Object> requestEntity = new HttpEntity<>(body, headers);
+            
+            // Forward request
+            return restTemplate.exchange(url, method, requestEntity, Object.class);
+            
+        } catch (HttpClientErrorException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Gateway error: " + e.getMessage());
+        }
+    }
+    
+    //Health check endpoint
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Gateway is running on port 8080");
+    }
+}

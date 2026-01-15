@@ -1,0 +1,50 @@
+package com.waterquality.rewards.service;
+
+//Necessary imports
+import com.waterquality.rewards.model.BadgeType;
+import com.waterquality.rewards.model.Rewards;
+import com.waterquality.rewards.repository.RewardsRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class RewardsService {
+	private final RewardsRepository repository;
+	
+	@Autowired
+	public RewardsService(RewardsRepository repository) {
+		this.repository = repository;
+	}
+	
+	/*
+	 * Adds points for citizen's submission
+	 * create new reward record if citizen has no existing record
+	 * Award badges when threshold is reached
+	 */
+	public Rewards addPointsForSubmission(String citizenId, boolean isComplete) {
+		
+		if(citizenId == null || citizenId.trim().isEmpty()) {
+			throw new IllegalArgumentException("Citizen Id cannot be null or empty");
+		}
+		//Get existing reward or create new one
+		Rewards reward = repository.findByCitizenId(citizenId)
+				.orElseGet(() -> new Rewards(citizenId));
+		
+		//Add points: 20 for complete, 10 for valid
+		int points = isComplete ? 20 : 10;
+		reward.addPoints(points, isComplete);
+		
+		return repository.save(reward);
+	}
+	
+	// gets reward record for a citizen by their Id
+	public Optional<Rewards> getRewardsByCitizen(String citizenId){
+		if (citizenId == null || citizenId.trim().isEmpty()) {
+			throw new IllegalArgumentException("citizen ID cannot be null or empty");
+		}
+		return repository.findByCitizenId(citizenId);
+	}
+	
+}
