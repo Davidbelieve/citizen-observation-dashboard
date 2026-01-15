@@ -1,0 +1,5 @@
+package com.waterquality.crowdsourced_data.model;
+
+public class WaterQuality {
+
+}

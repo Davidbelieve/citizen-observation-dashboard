@@ -1,0 +1,172 @@
+package com.waterquality.rewards.service;
+
+//Necessary imports
+import com.waterquality.rewards.model.BadgeType;
+import com.waterquality.rewards.model.Rewards;
+import com.waterquality.rewards.repository.RewardsRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.http.ResponseEntity;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class RewardsService {
+	private final RewardsRepository repository;
+	
+	@Autowired
+    private RestTemplate restTemplate;
+	
+	@Autowired
+	public RewardsService(RewardsRepository repository) {
+		this.repository = repository;
+	}
+	
+	
+	 //Adds points for citizen's submission and create new reward record if citizen has no existing record 
+	//and Award badges when threshold is reached
+	 
+	public Rewards addPointsForSubmission(String citizenId, boolean isComplete) {
+		
+		if(citizenId == null || citizenId.trim().isEmpty()) {
+			throw new IllegalArgumentException("Citizen Id cannot be null or empty");
+		}
+		//Get existing reward or create new one
+		Rewards reward = repository.findByCitizenId(citizenId)
+				.orElseGet(() -> new Rewards(citizenId));
+		
+		//Add points: 20 for complete, 10 for valid
+		int points = isComplete ? 20 : 10;
+		reward.addPoints(points, isComplete);
+		
+		return repository.save(reward);
+	}
+	
+	// gets reward record for a citizen by their Id
+	public Optional<Rewards> getRewardsByCitizen(String citizenId){
+		if (citizenId == null || citizenId.trim().isEmpty()) {
+			throw new IllegalArgumentException("citizen ID cannot be null or empty");
+		}
+		return repository.findByCitizenId(citizenId);
+	}
+	
+	//gets all reward record
+	public List<Rewards> getAllRewards(){
+		return repository.findAll();
+	}
+	
+	//Get leaderboard- top citizens by points
+	public List<Rewards> getLeaderboard(int limit){
+		if (limit <= 0) {
+			throw new IllegalArgumentException("Limit must be greater than 0"); 
+		}
+		
+		List<Rewards> allRewards = repository.findAllByOrderByTotalPointsDesc();
+		
+		//Return top limit Results
+		return allRewards.stream()
+				.limit(limit)
+				.toList();
+	}
+	//Gets all citizens who have earned a badge
+	public List<Rewards> getCitizensByBadge(BadgeType badgeType){
+		if(badgeType == null) {
+			throw new IllegalArgumentException("Badge type cannot be null");
+		}
+		
+		//Get citizen with point>= the badge threshold
+		int threshold;
+		switch (badgeType) {
+		case BRONZE:
+		threshold = 100;
+		break;
+		case SILVER:
+		threshold = 200;
+		break;
+		case GOLD:
+		threshold = 500;
+		break; 
+		default:
+			throw new IllegalArgumentException("Invalid badge type");
+		}
+		return repository.findByPointsGreaterThanEqual(threshold);
+	}
+	
+	//fetches observation from crowdservice and Calculate rewards for all citizens based on their observations
+     
+     
+	public void calculateRewardsForAllCitizens() {
+	    try {
+	        // CLEAR ALL EXISTING REWARDS FIRST
+	        repository.deleteAll();
+	        
+	        // Fetch all observations
+	        String url = "http://localhost:8081/observations";
+	        ResponseEntity<Object[]> response = restTemplate.getForEntity(url, Object[].class);
+	        Object[] observations = response.getBody();
+	        
+	        if (observations == null || observations.length == 0) {
+	            return;
+	        }
+	        
+	        // Count points per citizen
+	        java.util.Map<String, Integer> validCounts = new java.util.HashMap<>();
+	        java.util.Map<String, Integer> completeCounts = new java.util.HashMap<>();
+	        
+	        for (Object obsObj : observations) {
+	            try {
+	                @SuppressWarnings("unchecked")
+	                java.util.Map<String, Object> obs = (java.util.Map<String, Object>) obsObj;
+	                
+	                String citizenId = (String) obs.get("citizenId");
+	                if (citizenId == null || citizenId.trim().isEmpty()) {
+	                    continue;
+	                }
+	                
+	                boolean isComplete = isObservationComplete(obs);
+	                
+	                // Count submissions
+	                validCounts.put(citizenId, validCounts.getOrDefault(citizenId, 0) + 1);
+	                if (isComplete) {
+	                    completeCounts.put(citizenId, completeCounts.getOrDefault(citizenId, 0) + 1);
+	                }
+	                
+	            } catch (Exception e) {
+	                System.err.println("Error processing observation: " + e.getMessage());
+	            }
+	        }
+	        
+	        // Create fresh reward records
+	        for (String citizenId : validCounts.keySet()) {
+	            Rewards reward = new Rewards(citizenId);
+	            
+	            int validCount = validCounts.get(citizenId);
+	            int completeCount = completeCounts.getOrDefault(citizenId, 0);
+	            
+	            reward.setValidSubmissions(validCount);
+	            reward.setCompleteSubmissions(completeCount);
+	            reward.setTotalPoints((validCount * 10) + (completeCount * 10));  // 10 base + 10 bonus for complete
+	            
+	            // Manually trigger badge check
+	            reward.addPoints(0, false);  // This triggers updateBadges() in your model
+	            
+	            repository.save(reward);
+	        }
+	        
+	    } catch (Exception e) {
+	        throw new RuntimeException("Failed to calculate rewards: " + e.getMessage(), e);
+	    }
+	}
+
+    private boolean isObservationComplete(java.util.Map<String, Object> obs) {
+        return obs.get("temperature") != null
+            && obs.get("pH") != null
+            && obs.get("alkalinity") != null
+            && obs.get("turbidity") != null
+            && obs.get("observations") != null
+            && !obs.get("observations").toString().isEmpty();
+    }
+
+	
+}

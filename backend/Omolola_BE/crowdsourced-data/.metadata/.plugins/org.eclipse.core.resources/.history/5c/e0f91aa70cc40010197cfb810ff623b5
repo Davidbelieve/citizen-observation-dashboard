@@ -1,0 +1,5 @@
+package com.waterquality.gateway.controller;
+
+public class GatewayController {
+
+}

@@ -1,0 +1,97 @@
+package com.waterquality.gateway.controller;
+
+//Necessary imports
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.HttpClientErrorException;
+
+
+@RestController
+@RequestMapping("/api")
+public class GatewayController {
+	
+	
+	private final RestTemplate restTemplate;
+	
+	//Microservices URLs
+	private static final String CROWDSOURCED_MICROSERVICE = "http://localhost:8081";
+	private static final String REWARDS_MICROSERVICE = "http://localhost:8082";
+	
+	public GatewayController() {
+		this.restTemplate = new RestTemplate();
+	}
+	//Route observations port:8081
+	@RequestMapping(value = "/observations/**", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE})
+	public ResponseEntity<?> routeToCrowdsourced(
+			@RequestParam(required = false) Object body,
+			HttpMethod method,
+			@RequestParam(required = false) String citizenId){
+		    
+		try {
+			String path = "/observations";
+			
+			//full URL based on path variables
+			if (citizenId != null) {
+				path += "/citizen/" + citizenId;
+			}
+			
+			String url = CROWDSOURCED_MICROSERVICE + path;
+			
+			HttpEntity<Object>request = new HttpEntity<>(body);
+			
+			return restTemplate.exchange(url, method,request,Object.class);
+			
+		} catch (HttpClientErrorException e) {
+			return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body("Gateway error: " + e.getMessage());
+		}
+	}
+	
+	//Route rewards port:8082
+	@RequestMapping(value = "/rewards/**", method = {RequestMethod.GET, RequestMethod.POST})
+	public ResponseEntity<?> routeToRewards(
+			@RequestBody(required = false) Object body,
+			HttpMethod method,
+			@RequestParam(required = false) String citizenId,
+			@RequestParam(required = false, defaultValue ="10") int limit,
+			@RequestParam(required = false) String badgeType){
+		    
+		try {
+			String path = "/rewards";
+			
+			//full URL based on path request
+			if (citizenId != null) {
+				path += "/citizen/" + citizenId;
+			} else if (badgeType != null) {
+				path += "/badge/" + badgeType;
+			}
+			
+			//Add query parameters
+			if (limit !=10) {
+				path += "?limit=" + limit;
+			}
+			
+			String url = REWARDS_MICROSERVICE + path;
+			
+			HttpEntity<Object> request = new HttpEntity<>(body);
+			
+			return restTemplate.exchange(url, method,request,Object.class);
+			
+		} catch (HttpClientErrorException e) {
+			return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body("Gateway error: " + e.getMessage());
+		}
+	}
+	
+	//Health check endpoint
+	@GetMapping("/health")
+	public ResponseEntity<String> health(){
+		return ResponseEntity.ok("Gateway is running on port 8080");
+	}
+	
+}

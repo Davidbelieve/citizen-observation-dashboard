@@ -1,0 +1,113 @@
+package com.waterquality.crowdsourced_data.service;
+
+//Necessary imports
+import com.waterquality.crowdsourced_data.model.WaterQuality;
+import com.waterquality.crowdsourced_data.repository.WaterQualityRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
+import java.util.List;
+
+
+@Service
+public class WaterQualityService {
+	
+	private final WaterQualityRepository repository;
+	
+	@Autowired
+	public WaterQualityService(WaterQualityRepository repository) {
+		this.repository = repository;
+	}
+	/**
+	 * Submits a new water quality observation.
+	 * Validations before saving 
+	 * - postcode and at least one measurement or observation must be present
+	 * - observation types are from a predefined list
+	 * - Maximum of 3 images
+	 * - Citizen Id should be present
+	 * if validation passes, UUID & Submission timestamp is generated
+	 */
+	
+	
+	public WaterQuality submitObservation(WaterQuality observation) {
+		if (observation == null) {
+			throw new IllegalArgumentException("Observation cannot be null");
+		}
+		//Auto generate citizen ID using the format(currentyear & 001+ e.g 2025001, 2026001)
+		if(!observation.isValid()) {
+			throw new IllegalArgumentException(
+					"Invalid observation: must contain postcode and at least one measurement or observation");
+		}
+		if(!observation.hasValidObservationTypes()) {
+			throw new IllegalArgumentException("Invalid observation type.Valid types are CLEAR, CLOUDY, MURKY,"
+					+ "FOAMY, OILY, DISCOLOURED, PRESENCE_OF_ODOUR");
+		}
+		if (observation.getImageCount()>3){
+			throw new IllegalArgumentException("Maximum of 3 images allowed per observation");
+		}
+		
+		return repository.save(observation);
+	}
+	//Get observation by UUID
+	public WaterQuality getObservationById(String id){
+		return repository.findById(id)
+				.orElseThrow(()-> new IllegalArgumentException("Observation not found with ID" + id));
+		
+	}
+	
+	//Get all observations.
+	public List <WaterQuality> getAllObservations(){
+		return repository.findAll();
+	}
+	
+	//Get observation by Citizen's Id
+	public List <WaterQuality> getObservationsByCitizen(String citizenId){
+		if (citizenId == null || citizenId.trim().isEmpty()) {
+			throw new IllegalArgumentException("Citizen ID cannnot be null or empty");
+		}
+		return repository.findByCitizenId(citizenId);
+	}
+	
+	//Get observation by postcode
+	public List <WaterQuality> getObservationByPostcode(String postcode){
+		if(postcode == null || postcode.trim().isEmpty()) {
+			throw new IllegalArgumentException("Postcode cannot be null or empty");
+		}
+		return repository.findByPostcode(postcode);
+	}
+	
+	//counts the total number of observations submitted by a citizen.
+	public long countObservationsByCitizen(String citizenId) {
+		if(citizenId == null || citizenId.trim().isEmpty()) {
+			throw new IllegalArgumentException("Citizen ID cannot be null or Empty");
+		}
+		return repository.countByCitizenId(citizenId);
+	}
+	
+	//Delete an observation by UUID
+	
+	public void deleteObservation(String id) {
+		if(!repository.existsById(id)) {
+			throw new IllegalArgumentException("Observation not found with ID:" + id);
+		}
+		repository.deleteById(id);
+	}
+	
+	/*
+	 * Auto generate citizen ID using the current year & incremental counter i.e 2025001, 2025002, 2026001
+	 * The method is synchronized to prevent duplicate ID in concurent requests
+	 */
+	private synchronized String generateCitizenId() {
+		//Get current year
+		int year = LocalDateTime.now().getYear();
+		//create search pattern for current year
+		String yearPrefix = String.valueOf(year) + "%";
+		//query database for highest citizen number for the current year
+		Integer maxNumber = repository.findMaxCitizenNumberForYear(yearPrefix);
+		//if no citizen exist this year, start at 1 else increase the highest number
+		int nextNumber = (maxNumber == null) ? 1 : maxNumber + 1;
+		
+		//format as YYYY### (example= 2025001/2026002)
+		return String.format("%d%03d", year, nextNumber);
+	}
+}

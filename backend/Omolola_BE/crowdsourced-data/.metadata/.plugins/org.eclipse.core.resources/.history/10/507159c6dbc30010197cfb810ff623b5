@@ -1,0 +1,5 @@
+package com.waterquality.rewards.repository;
+
+public interface RewardsRepository {
+
+}

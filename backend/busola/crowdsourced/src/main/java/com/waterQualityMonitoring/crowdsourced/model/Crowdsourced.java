@@ -29,7 +29,6 @@ public class Crowdsourced {
     @ValidUkPostcode
     private String postcode;
 
-    @NotBlank
     private String citizenUniqueId;
 
     private Instant submittedAt;

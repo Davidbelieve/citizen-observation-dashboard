@@ -1,0 +1,141 @@
+package com.waterquality.rewards.model;
+
+//Necessary imports
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+
+@Entity
+@Table(name= "citizen_rewards")
+public class Rewards {
+	
+	@Id
+	@Column(length = 36, nullable = false)
+	private String id;
+	
+	//citizen ID frim crowdsourced service
+	@Column(name= "citizen_id",nullable = false, unique = true)
+    private String citizenId;
+	
+	//Total points accumulated
+	@Column(name= "total_points", nullable = false)
+	private Integer totalPoints;
+	
+	//Count of valid submissions (10 points each)
+	@Column(name= "valid_submissions",  nullable = false)
+	private Integer validSubmissions;
+	
+	//Count of complete submissions (20 points each)
+	@Column(name= "complete_submissions",  nullable = false)
+	private Integer completeSubmissions;
+	
+	//Collection of earned badges(Bronze, Silver, Gold)
+	@ElementCollection
+	@CollectionTable(name = "citizen_badges", joinColumns = @JoinColumn(name = "reward_id"))
+	private List<Badge> badges;
+	
+	//Last time this record was updated
+	@Column(name= "last_updated", nullable = false)
+	private LocalDateTime lastUpdated;
+	
+	//Default Constructor
+	public Rewards() {
+		this.totalPoints = 0;
+		this.validSubmissions = 0;
+		this.completeSubmissions = 0;
+		this.badges = new ArrayList<>();
+		
+	}
+	
+	//constructor with citizenId
+	public Rewards(String citizenId) {
+		this();
+		this.citizenId = citizenId;
+	}
+	
+	//Automatically generate ID and timestamp before saving to database
+	@PrePersist
+	private void generateIdAndTimestamp() {
+		if (this.id == null) {
+			this.id = UUID.randomUUID().toString();
+		}
+		if(this.lastUpdated == null) {
+			this.lastUpdated= LocalDateTime.now();
+		}
+	}
+	//Getters and Setters
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getCitizenId() {
+		return citizenId;
+	}
+
+	public void setCitizenId(String citizenId) {
+		this.citizenId = citizenId;
+	}
+
+	public Integer getTotalPoints() {
+		return totalPoints;
+	}
+
+	public void setTotaloints(Integer totalPoints) {
+		this.totalPoints = totalPoints;
+	}
+
+	public Integer getValidSubmissions() {
+		return validSubmissions;
+	}
+
+	public void setValidSubmissions(Integer validSubmissions) {
+		this.validSubmissions = validSubmissions;
+	}
+
+	public Integer getCompleteSubmissions() {
+		return completeSubmissions;
+	}
+
+	public void setCompleteSubmissions(Integer completeSubmissions) {
+		this.completeSubmissions = completeSubmissions;
+	}
+
+	public List<Badge> getBadges() {
+		return badges;
+	}
+
+	public void setBadges(List<Badge> badges) {
+		this.badges = badges;
+	}
+
+	public LocalDateTime getLastUpdated() {
+		return lastUpdated;
+	}
+
+	public void setLastUpdated(LocalDateTime lastUpdated) {
+		this.lastUpdated = lastUpdated;
+	}
+	
+	/*
+	 * Add points based on completed or valid submission
+	 * award badges when thresholds are reached.
+	 */
+	
+	public void addpoints(int points, boolean isComplete) {
+		this.totalpoints
+	}
+}
+
+
+
+
+
+
