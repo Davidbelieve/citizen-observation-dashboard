@@ -1,0 +1,124 @@
+================================================================================
+    SIMPLE CHECKLIST - TEST IN POSTMAN (COPY AND CHECK OFF)
+================================================================================
+
+📝 TEST 1: CREATE OBSERVATION
+================================================================================
+
+□ 1. Open Postman application
+□ 2. Click "New" button (top left)
+□ 3. Click "HTTP Request"
+□ 4. Click method dropdown (says "GET") → Select "POST"
+□ 5. Click in URL box → Type: http://localhost:8081/api/observations
+□ 6. Click "Headers" tab
+□ 7. Click in "Key" box → Type: Content-Type
+□ 8. Press Tab key → Type: application/json
+□ 9. Click "Body" tab
+□ 10. Click "raw" radio button
+□ 11. Click "Text" dropdown → Select "JSON"
+□ 12. Click in text area → Paste this:
+
+{
+  "citizenId": "C200",
+  "postcode": "NE1 7ST",
+  "temperature": 26.3,
+  "ph": 7.2,
+  "observations": ["Clear water"]
+}
+
+□ 13. Click "Send" button (top right)
+□ 14. Check response shows "Status: 201 Created"
+□ 15. Note the "id" number from response (e.g., "id": 1)
+
+✅ TEST 1 COMPLETE!
+
+================================================================================
+📝 TEST 2: GET ALL OBSERVATIONS
+================================================================================
+
+□ 1. Click "New" button
+□ 2. Click "HTTP Request"
+□ 3. Method should be "GET" (if not, change it)
+□ 4. Type URL: http://localhost:8081/api/observations
+□ 5. Click "Body" tab
+□ 6. Make sure "none" is selected
+□ 7. Click "Send" button
+□ 8. Check response shows "Status: 200 OK"
+□ 9. Check response shows array of observations
+
+✅ TEST 2 COMPLETE!
+
+================================================================================
+📝 TEST 3: GET BY ID
+================================================================================
+
+□ 1. Click "New" button
+□ 2. Click "HTTP Request"
+□ 3. Method: "GET"
+□ 4. Type URL: http://localhost:8081/api/observations/1
+   (Replace 1 with ID from Test 1)
+□ 5. Body: "none"
+□ 6. Click "Send"
+□ 7. Check "Status: 200 OK"
+□ 8. Check response shows single observation
+
+✅ TEST 3 COMPLETE!
+
+================================================================================
+📝 TEST 4: GET BY CITIZEN ID
+================================================================================
+
+□ 1. Click "New" button
+□ 2. Click "HTTP Request"
+□ 3. Method: "GET"
+□ 4. Type URL: http://localhost:8081/api/observations/citizen/C200
+□ 5. Body: "none"
+□ 6. Click "Send"
+□ 7. Check "Status: 200 OK"
+□ 8. Check response shows array
+
+✅ TEST 4 COMPLETE!
+
+================================================================================
+📝 TEST 5: GET BY POSTCODE
+================================================================================
+
+□ 1. Click "New" button
+□ 2. Click "HTTP Request"
+□ 3. Method: "GET"
+□ 4. Type URL: http://localhost:8081/api/observations/postcode/NE1%207ST
+□ 5. Body: "none"
+□ 6. Click "Send"
+□ 7. Check "Status: 200 OK"
+□ 8. Check response shows array
+
+✅ TEST 5 COMPLETE!
+
+================================================================================
+📝 TEST 6: VALIDATION ERROR
+================================================================================
+
+□ 1. Click "New" button
+□ 2. Click "HTTP Request"
+□ 3. Method: "POST"
+□ 4. URL: http://localhost:8081/api/observations
+□ 5. Headers: Content-Type = application/json
+□ 6. Body: "raw", "JSON"
+□ 7. Paste this (missing citizenId):
+
+{
+  "postcode": "NE1 7ST",
+  "temperature": 26.3
+}
+
+□ 8. Click "Send"
+□ 9. Check "Status: 400 Bad Request"
+□ 10. Check error message about "Citizen ID is required"
+
+✅ TEST 6 COMPLETE!
+
+================================================================================
+🎉 ALL TESTS COMPLETE! 🎉
+================================================================================
+
+

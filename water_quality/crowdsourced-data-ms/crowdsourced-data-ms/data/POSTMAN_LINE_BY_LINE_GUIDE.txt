@@ -1,0 +1,509 @@
+================================================================================
+    POSTMAN TESTING - LINE BY LINE INSTRUCTIONS (VERY DETAILED)
+================================================================================
+
+📋 PRE-REQUISITE CHECK:
+✅ Make sure your Spring Boot application is running
+✅ Check console shows: "Started CrowdsourcedDataMsApplication on port 8081"
+✅ Open Postman application
+
+================================================================================
+TEST 1: CREATE OBSERVATION (POST) - LINE BY LINE
+================================================================================
+
+STEP 1: Open Postman
+→ Click on Postman icon to open the application
+
+STEP 2: Create New Request
+→ Look at the top left corner of Postman
+→ Click the "New" button (or press Ctrl+N)
+→ A dropdown menu will appear
+→ Click on "HTTP Request" from the dropdown
+
+STEP 3: Name Your Request (Optional but Recommended)
+→ You will see "New Request" or "Untitled Request" at the top
+→ Click on it and type: "Create Observation"
+→ Press Enter
+
+STEP 4: Set HTTP Method to POST
+→ Look at the left side of the URL bar
+→ You will see a dropdown that says "GET" (default)
+→ Click on the dropdown
+→ Scroll down and click on "POST"
+→ Now the dropdown should show "POST"
+
+STEP 5: Enter the URL
+→ Look at the URL bar (next to the POST dropdown)
+→ Click in the URL input field
+→ Type exactly: http://localhost:8081/api/observations
+→ Make sure there are no spaces before or after
+→ Press Enter (or leave it, we'll send later)
+
+STEP 6: Go to Headers Tab
+→ Look below the URL bar
+→ You will see tabs: "Params", "Authorization", "Headers", "Body", etc.
+→ Click on the "Headers" tab
+→ The Headers section will open below
+
+STEP 7: Add Content-Type Header
+→ In the Headers section, you will see two columns: "Key" and "Value"
+→ Click in the first empty row under "Key" column
+→ Type exactly: Content-Type
+→ Press Tab key to move to "Value" column
+→ Type exactly: application/json
+→ Make sure "Content-Type" is checked (checkbox should be ticked)
+
+STEP 8: Go to Body Tab
+→ Click on the "Body" tab (next to Headers tab)
+→ The Body section will open
+
+STEP 9: Select Raw Option
+→ In the Body tab, you will see radio buttons:
+  - none
+  - form-data
+  - x-www-form-urlencoded
+  - raw
+  - binary
+  - GraphQL
+→ Click on the radio button next to "raw"
+→ "raw" should now be selected (dot filled in)
+
+STEP 10: Select JSON Format
+→ After selecting "raw", look to the right side
+→ You will see a dropdown that says "Text" (default)
+→ Click on this dropdown
+→ Scroll down and click on "JSON"
+→ The dropdown should now show "JSON"
+
+STEP 11: Enter JSON Data
+→ Click in the large text area below
+→ You will see a cursor blinking
+→ Delete any existing text if present
+→ Copy and paste this EXACT JSON (or type it):
+
+{
+  "citizenId": "C200",
+  "postcode": "NE1 7ST",
+  "temperature": 26.3,
+  "ph": 7.2,
+  "alkalinity": 8.5,
+  "turbidity": 2.1,
+  "observations": ["Clear water", "Good quality"],
+  "imagePaths": ["image1.jpg", "image2.jpg"]
+}
+
+→ Make sure:
+  - All quotes are straight quotes (") not curly quotes (" or ")
+  - All brackets and braces match
+  - No extra commas at the end
+  - JSON is properly formatted
+
+STEP 12: Send the Request
+→ Look at the top right corner of Postman
+→ You will see a blue button that says "Send"
+→ Click on the "Send" button
+→ OR press Ctrl+Enter
+
+STEP 13: Check the Response
+→ After clicking Send, wait 1-2 seconds
+→ Look at the bottom section of Postman (Response area)
+→ You should see:
+
+Status Section:
+→ Look at the top of the response area
+→ You should see: "Status: 201 Created" (in green color)
+→ If you see this, your request was successful!
+
+Response Body:
+→ Scroll down in the response area
+→ You will see a section with JSON data
+→ It should look like this:
+
+{
+  "id": 1,
+  "citizenId": "C200",
+  "postcode": "NE1 7ST",
+  "temperature": 26.3,
+  "ph": 7.2,
+  "alkalinity": 8.5,
+  "turbidity": 2.1,
+  "observations": ["Clear water", "Good quality"],
+  "imagePaths": ["image1.jpg", "image2.jpg"],
+  "submittedAt": "2024-01-15T10:30:00",
+  "valid": true
+}
+
+→ Note the "id" value (e.g., 1) - you'll need this for next test
+→ Check that "valid" is "true"
+→ Check that "submittedAt" has a timestamp
+
+✅ SUCCESS! Your first observation is created!
+
+================================================================================
+TEST 2: GET ALL OBSERVATIONS (GET) - LINE BY LINE
+================================================================================
+
+STEP 1: Create New Request
+→ Click "New" button again (top left)
+→ Click "HTTP Request"
+→ Name it: "Get All Observations"
+
+STEP 2: Set Method to GET
+→ Click the method dropdown (left of URL bar)
+→ Select "GET"
+→ Method should now show "GET"
+
+STEP 3: Enter URL
+→ Click in URL input field
+→ Type: http://localhost:8081/api/observations
+→ Press Enter
+
+STEP 4: Remove Body (If Present)
+→ Click on "Body" tab
+→ Make sure "none" is selected (radio button)
+→ If "raw" or anything else is selected, click "none"
+
+STEP 5: Check Headers (Optional)
+→ Click on "Headers" tab
+→ You don't need any headers for GET request
+→ If Content-Type is there, you can remove it (not required)
+
+STEP 6: Send Request
+→ Click the "Send" button (top right)
+→ OR press Ctrl+Enter
+
+STEP 7: Check Response
+→ Look at response area (bottom of Postman)
+
+Status:
+→ Should show: "Status: 200 OK" (in green)
+
+Response Body:
+→ Should show an array (starts with [ and ends with ])
+→ Should contain all observations you created
+→ Example:
+
+[
+  {
+    "id": 1,
+    "citizenId": "C200",
+    "postcode": "NE1 7ST",
+    ...
+  }
+]
+
+✅ SUCCESS! You retrieved all observations!
+
+================================================================================
+TEST 3: GET OBSERVATION BY ID (GET) - LINE BY LINE
+================================================================================
+
+STEP 1: Create New Request
+→ Click "New" button
+→ Click "HTTP Request"
+→ Name it: "Get Observation by ID"
+
+STEP 2: Set Method to GET
+→ Select "GET" from method dropdown
+
+STEP 3: Enter URL with ID
+→ Click in URL input field
+→ Type: http://localhost:8081/api/observations/1
+→ Replace "1" with the actual ID from Test 1 response
+→ For example, if Test 1 returned id: 2, use: /api/observations/2
+→ Complete URL example: http://localhost:8081/api/observations/1
+
+STEP 4: No Body Needed
+→ Click "Body" tab
+→ Make sure "none" is selected
+
+STEP 5: Send Request
+→ Click "Send" button
+
+STEP 6: Check Response
+→ Status should be: "200 OK"
+→ Response should show a SINGLE observation object (not array)
+→ Should start with { and end with }
+→ Should have the ID you requested
+
+✅ SUCCESS! You retrieved observation by ID!
+
+BONUS: Test Invalid ID
+→ Change URL to: http://localhost:8081/api/observations/999
+→ Click Send
+→ Status should be: "404 Not Found"
+→ Response should show error message
+
+================================================================================
+TEST 4: GET BY CITIZEN ID (GET) - LINE BY LINE
+================================================================================
+
+STEP 1: Create New Request
+→ Click "New" button
+→ Click "HTTP Request"
+→ Name it: "Get by Citizen ID"
+
+STEP 2: Set Method to GET
+→ Select "GET" from dropdown
+
+STEP 3: Enter URL
+→ Type: http://localhost:8081/api/observations/citizen/C200
+→ Replace "C200" with the citizenId you used in Test 1
+→ Make sure there are no spaces
+
+STEP 4: No Body
+→ Body tab → Select "none"
+
+STEP 5: Send Request
+→ Click "Send"
+
+STEP 6: Check Response
+→ Status: "200 OK"
+→ Response: Array of observations for that citizen
+→ Should contain all observations where citizenId = C200
+
+✅ SUCCESS! You retrieved observations by citizen!
+
+================================================================================
+TEST 5: GET BY POSTCODE (GET) - LINE BY LINE
+================================================================================
+
+STEP 1: Create New Request
+→ Click "New" button
+→ Click "HTTP Request"
+→ Name it: "Get by Postcode"
+
+STEP 2: Set Method to GET
+→ Select "GET"
+
+STEP 3: Enter URL
+→ Type: http://localhost:8081/api/observations/postcode/NE1%207ST
+→ OR type: http://localhost:8081/api/observations/postcode/NE1 7ST
+→ Postman will automatically convert space to %20
+→ Replace "NE1 7ST" with the postcode you used in Test 1
+
+STEP 4: No Body
+→ Body tab → "none"
+
+STEP 5: Send Request
+→ Click "Send"
+
+STEP 6: Check Response
+→ Status: "200 OK"
+→ Response: Array of observations for that postcode
+→ Should contain all observations where postcode = NE1 7ST
+
+✅ SUCCESS! You retrieved observations by postcode!
+
+================================================================================
+TEST 6: VALIDATION ERROR TEST (POST) - LINE BY LINE
+================================================================================
+
+STEP 1: Create New Request
+→ Click "New" button
+→ Click "HTTP Request"
+→ Name it: "Validation Error Test"
+
+STEP 2: Set Method to POST
+→ Select "POST"
+
+STEP 3: Enter URL
+→ Type: http://localhost:8081/api/observations
+
+STEP 4: Add Header
+→ Click "Headers" tab
+→ Add: Content-Type = application/json
+
+STEP 5: Add Body
+→ Click "Body" tab
+→ Select "raw"
+→ Select "JSON" from dropdown
+
+STEP 6: Enter INVALID JSON (Missing Required Field)
+→ Paste this JSON (note: missing "citizenId"):
+
+{
+  "postcode": "NE1 7ST",
+  "temperature": 26.3
+}
+
+STEP 7: Send Request
+→ Click "Send"
+
+STEP 8: Check Response
+→ Status should be: "400 Bad Request" (in red/orange)
+→ Response should show validation error
+→ Should contain message about "Citizen ID is required"
+
+✅ SUCCESS! Validation is working correctly!
+
+================================================================================
+VISUAL CHECKLIST - WHAT YOU SHOULD SEE IN POSTMAN
+================================================================================
+
+FOR POST REQUEST:
+□ Method dropdown shows "POST"
+□ URL bar shows: http://localhost:8081/api/observations
+□ Headers tab has: Content-Type: application/json
+□ Body tab has "raw" selected
+□ Body tab dropdown shows "JSON"
+□ JSON data is in the body text area
+□ Send button is visible (blue button, top right)
+
+FOR GET REQUEST:
+□ Method dropdown shows "GET"
+□ URL bar shows the endpoint URL
+□ Body tab has "none" selected
+□ No headers needed (or empty)
+□ Send button is visible
+
+RESPONSE AREA (Bottom of Postman):
+□ Status code is visible (200, 201, 400, 404)
+□ Response body shows JSON data
+□ Time taken is shown
+□ Size of response is shown
+
+================================================================================
+COMMON MISTAKES TO AVOID
+================================================================================
+
+❌ MISTAKE 1: Forgetting to set Content-Type header for POST
+   ✅ FIX: Always add Content-Type: application/json for POST requests
+
+❌ MISTAKE 2: Selecting wrong body type
+   ✅ FIX: Make sure "raw" and "JSON" are selected for POST
+
+❌ MISTAKE 3: Wrong URL format
+   ✅ FIX: Use exact URL: http://localhost:8081/api/observations
+   ✅ FIX: No trailing slash, no spaces
+
+❌ MISTAKE 4: JSON syntax errors
+   ✅ FIX: Check all quotes are straight quotes (")
+   ✅ FIX: Check all brackets match { } and [ ]
+   ✅ FIX: No trailing commas
+
+❌ MISTAKE 5: Using GET method with body
+   ✅ FIX: GET requests should have "none" selected in Body tab
+
+❌ MISTAKE 6: Application not running
+   ✅ FIX: Check Spring Boot console shows "Started on port 8081"
+
+❌ MISTAKE 7: Wrong port number
+   ✅ FIX: Make sure URL uses port 8081, not 8080
+
+================================================================================
+SCREENSHOT GUIDE - WHAT TO CAPTURE
+================================================================================
+
+For each test, capture a screenshot showing:
+
+1. REQUEST SECTION (Top):
+   - Method (POST/GET)
+   - URL
+   - Headers (if any)
+   - Body (if any)
+
+2. RESPONSE SECTION (Bottom):
+   - Status code
+   - Response body
+   - Response time
+
+Save screenshots as:
+- 01_POST_Create_Observation.png
+- 02_GET_All_Observations.png
+- 03_GET_By_ID.png
+- 04_GET_By_Citizen.png
+- 05_GET_By_Postcode.png
+- 06_Validation_Error.png
+
+================================================================================
+TROUBLESHOOTING - LINE BY LINE
+================================================================================
+
+PROBLEM: "Could not get response" or "Connection refused"
+SOLUTION:
+→ Check if Spring Boot app is running
+→ Look at Eclipse/IDE console
+→ Should see: "Started CrowdsourcedDataMsApplication"
+→ If not running, right-click CrowdsourcedDataMsApplication.java
+→ Click "Run As" → "Spring Boot App"
+→ Wait for "Started on port 8081" message
+
+PROBLEM: "404 Not Found"
+SOLUTION:
+→ Check URL is exactly: http://localhost:8081/api/observations
+→ Check application is running
+→ Check port is 8081 (not 8080)
+→ Check endpoint path is correct
+
+PROBLEM: "400 Bad Request"
+SOLUTION:
+→ This might be correct if testing validation
+→ Check JSON format is valid
+→ Check required fields are present (citizenId, postcode)
+→ Check Content-Type header is set
+
+PROBLEM: "500 Internal Server Error"
+SOLUTION:
+→ Check Spring Boot console for error details
+→ Check MySQL is running
+→ Check database "citizendb" exists
+→ Check database connection in application.properties
+
+PROBLEM: Response is empty or null
+SOLUTION:
+→ Check if data exists in database
+→ Try creating observation first (POST)
+→ Then try GET requests
+
+PROBLEM: JSON is not formatted correctly
+SOLUTION:
+→ Use Postman's "Pretty" view (click "Pretty" button in response)
+→ Check JSON validator online
+→ Make sure all quotes, brackets match
+
+================================================================================
+SUMMARY - QUICK REFERENCE
+================================================================================
+
+POST /api/observations
+1. Method: POST
+2. URL: http://localhost:8081/api/observations
+3. Header: Content-Type: application/json
+4. Body: raw, JSON, paste JSON data
+5. Click Send
+6. Expect: 201 Created
+
+GET /api/observations
+1. Method: GET
+2. URL: http://localhost:8081/api/observations
+3. Body: none
+4. Click Send
+5. Expect: 200 OK with array
+
+GET /api/observations/{id}
+1. Method: GET
+2. URL: http://localhost:8081/api/observations/1
+3. Body: none
+4. Click Send
+5. Expect: 200 OK with single object
+
+GET /api/observations/citizen/{citizenId}
+1. Method: GET
+2. URL: http://localhost:8081/api/observations/citizen/C200
+3. Body: none
+4. Click Send
+5. Expect: 200 OK with array
+
+GET /api/observations/postcode/{postcode}
+1. Method: GET
+2. URL: http://localhost:8081/api/observations/postcode/NE1%207ST
+3. Body: none
+4. Click Send
+5. Expect: 200 OK with array
+
+================================================================================
+YOU'RE READY! FOLLOW THESE STEPS LINE BY LINE! 🎉
+================================================================================
+
+

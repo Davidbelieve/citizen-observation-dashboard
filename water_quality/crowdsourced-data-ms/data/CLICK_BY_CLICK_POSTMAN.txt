@@ -1,0 +1,359 @@
+================================================================================
+    POSTMAN - CLICK BY CLICK INSTRUCTIONS (SUPER SIMPLE)
+================================================================================
+
+🎯 TEST 1: CREATE OBSERVATION (POST REQUEST)
+================================================================================
+
+📍 WHERE TO CLICK - EXACT LOCATIONS:
+
+┌─────────────────────────────────────────────────────────┐
+│ POSTMAN WINDOW                                          │
+├─────────────────────────────────────────────────────────┤
+│ [New] [Import] [Run] ...                                │
+│                                                         │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │ [GET ▼] [http://localhost:8081/api/observations]│  │ ← URL BAR
+│  └──────────────────────────────────────────────────┘  │
+│                                                         │
+│  [Params] [Authorization] [Headers] [Body] [Pre-request]│ ← TABS
+│                                                         │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │                                                   │  │
+│  │                                                   │  │ ← BODY AREA
+│  │                                                   │  │
+│  └──────────────────────────────────────────────────┘  │
+│                                                         │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │ Response Area (appears after sending)            │  │
+│  └──────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────┘
+
+STEP-BY-STEP CLICKS:
+
+1. CLICK "New" button (top left corner)
+   → Location: Top left of Postman window
+   → Look for: Blue button with "+ New" or "New" text
+
+2. CLICK "HTTP Request" 
+   → Location: Dropdown menu that appears after clicking "New"
+   → Look for: "HTTP Request" option in the menu
+
+3. CLICK on the method dropdown (says "GET" by default)
+   → Location: Left side of URL bar
+   → Look for: Dropdown showing "GET", "POST", etc.
+
+4. CLICK "POST" from the dropdown
+   → Location: Dropdown menu that opened
+   → Look for: "POST" option in the list
+
+5. CLICK in the URL input field
+   → Location: Right side of the method dropdown
+   → Look for: Empty text box next to "POST"
+
+6. TYPE: http://localhost:8081/api/observations
+   → Type exactly as shown (no spaces)
+
+7. CLICK "Headers" tab
+   → Location: Below URL bar
+   → Look for: Tab labeled "Headers"
+
+8. CLICK in "Key" column (first empty row)
+   → Location: Headers section, left column
+   → Look for: Empty cell under "Key"
+
+9. TYPE: Content-Type
+   → Type exactly as shown
+
+10. PRESS Tab key on keyboard
+    → This moves cursor to "Value" column
+
+11. TYPE: application/json
+    → Type exactly as shown
+
+12. CLICK "Body" tab
+    → Location: Next to "Headers" tab
+    → Look for: Tab labeled "Body"
+
+13. CLICK radio button next to "raw"
+    → Location: Body tab section
+    → Look for: Radio buttons (none, form-data, raw, etc.)
+    → CLICK the circle next to "raw"
+
+14. CLICK dropdown that says "Text" (right side)
+    → Location: Right side of "raw" selection
+    → Look for: Dropdown menu
+
+15. CLICK "JSON" from dropdown
+    → Location: Dropdown menu that opened
+    → Look for: "JSON" option
+
+16. CLICK in the large text area below
+    → Location: Body section, large empty area
+    → Look for: Big text box below the dropdowns
+
+17. PASTE this JSON (or type it):
+    {
+      "citizenId": "C200",
+      "postcode": "NE1 7ST",
+      "temperature": 26.3,
+      "ph": 7.2,
+      "observations": ["Clear water"]
+    }
+
+18. CLICK "Send" button
+    → Location: Top right corner of Postman
+    → Look for: Blue button labeled "Send"
+    → OR press Ctrl+Enter on keyboard
+
+19. LOOK at bottom section (Response area)
+    → Location: Bottom half of Postman window
+    → Look for: Status code and response body
+    → Should see: "Status: 201 Created" in green
+
+✅ DONE! Observation created!
+
+================================================================================
+🎯 TEST 2: GET ALL OBSERVATIONS (GET REQUEST)
+================================================================================
+
+1. CLICK "New" button (top left)
+
+2. CLICK "HTTP Request"
+
+3. CLICK method dropdown
+
+4. CLICK "GET" (it might already be selected)
+
+5. CLICK in URL field
+
+6. TYPE: http://localhost:8081/api/observations
+
+7. CLICK "Body" tab
+
+8. CLICK radio button next to "none"
+   → Make sure "none" is selected (not "raw")
+
+9. CLICK "Send" button
+
+10. LOOK at response area (bottom)
+    → Should see: "Status: 200 OK"
+    → Should see: Array of observations in JSON format
+
+✅ DONE! All observations retrieved!
+
+================================================================================
+🎯 TEST 3: GET BY ID (GET REQUEST)
+================================================================================
+
+1. CLICK "New" button
+
+2. CLICK "HTTP Request"
+
+3. CLICK method dropdown → CLICK "GET"
+
+4. CLICK in URL field
+
+5. TYPE: http://localhost:8081/api/observations/1
+   → Replace "1" with actual ID from Test 1 response
+
+6. CLICK "Body" tab → CLICK "none"
+
+7. CLICK "Send" button
+
+8. LOOK at response
+   → Should see: "Status: 200 OK"
+   → Should see: Single observation object (not array)
+
+✅ DONE! Observation by ID retrieved!
+
+================================================================================
+🎯 TEST 4: GET BY CITIZEN ID (GET REQUEST)
+================================================================================
+
+1. CLICK "New" button
+
+2. CLICK "HTTP Request"
+
+3. CLICK method dropdown → CLICK "GET"
+
+4. CLICK in URL field
+
+5. TYPE: http://localhost:8081/api/observations/citizen/C200
+   → Replace "C200" with actual citizenId from Test 1
+
+6. CLICK "Body" tab → CLICK "none"
+
+7. CLICK "Send" button
+
+8. LOOK at response
+   → Should see: "Status: 200 OK"
+   → Should see: Array of observations for that citizen
+
+✅ DONE! Observations by citizen retrieved!
+
+================================================================================
+🎯 TEST 5: GET BY POSTCODE (GET REQUEST)
+================================================================================
+
+1. CLICK "New" button
+
+2. CLICK "HTTP Request"
+
+3. CLICK method dropdown → CLICK "GET"
+
+4. CLICK in URL field
+
+5. TYPE: http://localhost:8081/api/observations/postcode/NE1%207ST
+   → OR type: http://localhost:8081/api/observations/postcode/NE1 7ST
+   → Postman will auto-convert space to %20
+
+6. CLICK "Body" tab → CLICK "none"
+
+7. CLICK "Send" button
+
+8. LOOK at response
+   → Should see: "Status: 200 OK"
+   → Should see: Array of observations for that postcode
+
+✅ DONE! Observations by postcode retrieved!
+
+================================================================================
+📸 WHAT YOUR POSTMAN SCREEN SHOULD LOOK LIKE
+================================================================================
+
+FOR POST REQUEST:
+┌──────────────────────────────────────────────────────┐
+│ POSTMAN                                              │
+├──────────────────────────────────────────────────────┤
+│ [New] [Import]                                       │
+│                                                      │
+│ [POST ▼] [http://localhost:8081/api/observations]   │
+│                                                      │
+│ [Params][Auth][Headers✓][Body✓][Pre-req][Tests]     │
+│                                                      │
+│ Headers Tab:                                         │
+│ Key              Value                               │
+│ Content-Type     application/json                    │
+│                                                      │
+│ Body Tab:                                           │
+│ ○ none  ○ form-data  ● raw  ○ binary                │
+│                     [Text ▼] → select JSON          │
+│                                                      │
+│ {                                                   │
+│   "citizenId": "C200",                              │
+│   "postcode": "NE1 7ST",                            │
+│   ...                                                │
+│ }                                                   │
+│                                                      │
+│                                    [Send] ← CLICK   │
+│                                                      │
+│ ─────────────────────────────────────────────────── │
+│ Response (after clicking Send):                     │
+│ Status: 201 Created                                  │
+│ Time: 234 ms                                         │
+│                                                      │
+│ {                                                   │
+│   "id": 1,                                          │
+│   "citizenId": "C200",                              │
+│   ...                                                │
+│ }                                                   │
+└──────────────────────────────────────────────────────┘
+
+FOR GET REQUEST:
+┌──────────────────────────────────────────────────────┐
+│ POSTMAN                                              │
+├──────────────────────────────────────────────────────┤
+│ [GET ▼] [http://localhost:8081/api/observations]    │
+│                                                      │
+│ [Params][Auth][Headers][Body✓][Pre-req][Tests]      │
+│                                                      │
+│ Body Tab:                                            │
+│ ● none  ○ form-data  ○ raw  ○ binary                │
+│                                                      │
+│                                    [Send] ← CLICK   │
+│                                                      │
+│ ─────────────────────────────────────────────────── │
+│ Response:                                            │
+│ Status: 200 OK                                       │
+│                                                      │
+│ [                                                    │
+│   { "id": 1, ... },                                 │
+│   { "id": 2, ... }                                  │
+│ ]                                                   │
+└──────────────────────────────────────────────────────┘
+
+================================================================================
+🔍 WHERE TO FIND THINGS IN POSTMAN
+================================================================================
+
+"New" Button:
+→ Top left corner
+→ Usually blue or gray button
+→ Says "New" or has a "+" icon
+
+Method Dropdown:
+→ Left side of URL bar
+→ Shows "GET", "POST", "PUT", etc.
+→ Click to change method
+
+URL Bar:
+→ Right side of method dropdown
+→ Long text input field
+→ Where you type the URL
+
+Tabs (Params, Headers, Body, etc.):
+→ Below URL bar
+→ Horizontal row of clickable tabs
+→ Click to switch sections
+
+Headers Section:
+→ Appears when you click "Headers" tab
+→ Has "Key" and "Value" columns
+→ Where you add Content-Type header
+
+Body Section:
+→ Appears when you click "Body" tab
+→ Has radio buttons (none, raw, etc.)
+→ Has dropdown for format (Text, JSON, etc.)
+→ Has large text area for data
+
+Send Button:
+→ Top right corner
+→ Blue button
+→ Says "Send"
+→ Click to send request
+
+Response Area:
+→ Bottom half of Postman window
+→ Appears after clicking Send
+→ Shows status code, time, and response body
+
+================================================================================
+✅ CHECKLIST - BEFORE CLICKING SEND
+================================================================================
+
+FOR POST REQUEST:
+□ Method is "POST" (check dropdown)
+□ URL is correct: http://localhost:8081/api/observations
+□ Headers tab is open
+□ Content-Type header is added: application/json
+□ Body tab is open
+□ "raw" is selected (radio button)
+□ "JSON" is selected (dropdown)
+□ JSON data is in the text area
+□ JSON syntax is correct (all brackets match)
+□ Application is running (check Spring Boot console)
+
+FOR GET REQUEST:
+□ Method is "GET" (check dropdown)
+□ URL is correct
+□ Body tab is open
+□ "none" is selected (radio button)
+□ Application is running
+
+================================================================================
+🎉 YOU'RE ALL SET! FOLLOW THESE CLICKS EXACTLY! 🎉
+================================================================================
+
+
