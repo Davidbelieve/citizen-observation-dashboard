@@ -8,11 +8,13 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.waterQualityMonitoring.crowdsourced.model.Crowdsourced;
 import com.waterQualityMonitoring.crowdsourced.model.Crowdsourced.ImagePayload;
@@ -23,6 +25,7 @@ import com.waterQualityMonitoring.crowdsourced.model.Observation;
 import com.waterQualityMonitoring.crowdsourced.model.ObservationObservation;
 import com.waterQualityMonitoring.crowdsourced.model.ObservationTag;
 import com.waterQualityMonitoring.crowdsourced.model.ObservationTagType;
+import com.waterQualityMonitoring.crowdsourced.model.Image;
 import com.waterQualityMonitoring.crowdsourced.repository.ImageRepository;
 import com.waterQualityMonitoring.crowdsourced.repository.MeasurementRepository;
 import com.waterQualityMonitoring.crowdsourced.repository.ObservationObservationRepository;
@@ -90,7 +93,6 @@ public class CrowdsourcedService {
         return observationRepository.findAll();
     }
 
-    @Transactional(readOnly = true)
     /**
      * Retrieves observations using Spring Data pagination.
      *
@@ -98,7 +100,9 @@ public class CrowdsourcedService {
      * @return page containing observation entities
      */
     public Page<Observation> getObservations(Pageable pageable) {
-        return observationRepository.findAll(pageable);
+        Page<Observation> observationPage = observationRepository.findAll(pageable);
+        backfillLegacyObservationData(observationPage.getContent());
+        return observationPage;
     }
 
     @Transactional(readOnly = true)
@@ -149,12 +153,18 @@ public class CrowdsourcedService {
 
         if (request.getValidated() != null) {
             observation.setValidated(request.getValidated());
+        } else {
+            observation.setValidated(true);
         }
         observation.setNotes(request.getNotes());
         if (request.getSubmittedAt() != null) {
             observation.setSubmittedAt(request.getSubmittedAt());
         }
-        observation.setCitizenUniqueId(request.getCitizenUniqueId());
+        String citizenUniqueId = request.getCitizenUniqueId();
+        if (!StringUtils.hasText(citizenUniqueId)) {
+            citizenUniqueId = generateCitizenUniqueId();
+        }
+        observation.setCitizenUniqueId(citizenUniqueId);
 
         return observation;
     }
@@ -327,6 +337,40 @@ public class CrowdsourcedService {
     private Observation reloadObservation(UUID id) {
         return observationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Observation not found with id: " + id));
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Image> getImage(UUID id) {
+        return imageRepository.findById(id);
+    }
+
+    private void backfillLegacyObservationData(List<Observation> observations) {
+        List<Observation> updates = new ArrayList<>();
+        for (Observation observation : observations) {
+            boolean updated = false;
+            if (!StringUtils.hasText(observation.getCitizenUniqueId())) {
+                observation.setCitizenUniqueId(generateCitizenUniqueId());
+                updated = true;
+            }
+            if (observation.getValidated() == null) {
+                observation.setValidated(true);
+                updated = true;
+            }
+            if (updated) {
+                updates.add(observation);
+            }
+        }
+        if (!updates.isEmpty()) {
+            observationRepository.saveAll(updates);
+        }
+    }
+
+    private synchronized String generateCitizenUniqueId() {
+        int year = LocalDateTime.now().getYear();
+        String yearPrefix = String.valueOf(year) + "%";
+        Integer maxNumber = observationRepository.findMaxCitizenNumberForYear(yearPrefix);
+        int nextNumber = (maxNumber == null) ? 1 : maxNumber + 1;
+        return String.format("%d%03d", year, nextNumber);
     }
 }
 

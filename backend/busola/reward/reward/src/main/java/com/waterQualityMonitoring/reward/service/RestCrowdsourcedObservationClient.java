@@ -90,7 +90,11 @@ public class RestCrowdsourcedObservationClient implements CrowdsourcedObservatio
 
         CrowdsourcedObservation observation = new CrowdsourcedObservation();
         observation.setObservationId(dto.getId());
-        observation.setCitizenId(dto.getCitizenUniqueId());
+        String citizenId = dto.getCitizenUniqueId();
+        if (citizenId == null || citizenId.isBlank()) {
+            citizenId = dto.getCitizenId();
+        }
+        observation.setCitizenId(citizenId);
         observation.setPostcode(dto.getPostcode());
         observation.setSubmittedAt(dto.getSubmittedAt());
         observation.setValidated(Boolean.TRUE.equals(dto.getValidated()));
@@ -174,6 +178,7 @@ public class RestCrowdsourcedObservationClient implements CrowdsourcedObservatio
     static final class ObservationDto {
         private String id;
         private String citizenUniqueId;
+        private String citizenId;
         private String postcode;
         private Instant submittedAt;
         private Boolean validated;
@@ -195,6 +200,14 @@ public class RestCrowdsourcedObservationClient implements CrowdsourcedObservatio
 
         public void setCitizenUniqueId(String citizenUniqueId) {
             this.citizenUniqueId = citizenUniqueId;
+        }
+
+        public String getCitizenId() {
+            return citizenId;
+        }
+
+        public void setCitizenId(String citizenId) {
+            this.citizenId = citizenId;
         }
 
         public String getPostcode() {
