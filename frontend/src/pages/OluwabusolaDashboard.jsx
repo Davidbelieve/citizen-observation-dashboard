@@ -111,7 +111,7 @@ export function OluwabusolaDashboard() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
         <div style={{ flex: 1 }}>
           <h1 style={{ marginBottom: '8px' }}>
-            Oluwabusola Dashboard 💧📊
+            South East England Dashboard 💧📊
           </h1>
           <p style={{ color: '#6b7280', marginBottom: 0 }}>
             Water quality monitoring dashboard with crowdsourced observations and rewards
