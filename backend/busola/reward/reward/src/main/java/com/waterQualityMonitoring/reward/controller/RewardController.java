@@ -45,6 +45,10 @@ public class RewardController {
     public ResponseEntity<List<RewardSummaryResponse>> getAllRewards() {
         List<RewardSummaryResponse> summaries = rewardService.getAllSummaries();
         if (CollectionUtils.isEmpty(summaries)) {
+            RewardCalculationResult calculationResult = rewardService.calculateRewards();
+            summaries = calculationResult.getSummaries();
+        }
+        if (CollectionUtils.isEmpty(summaries)) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(summaries);

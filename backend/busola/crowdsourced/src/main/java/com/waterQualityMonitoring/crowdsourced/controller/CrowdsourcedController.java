@@ -3,6 +3,9 @@ package com.waterQualityMonitoring.crowdsourced.controller;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -10,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +31,7 @@ import com.waterQualityMonitoring.crowdsourced.dto.ObservationResponse;
 import com.waterQualityMonitoring.crowdsourced.dto.PagedResponse;
 import com.waterQualityMonitoring.crowdsourced.model.Crowdsourced;
 import com.waterQualityMonitoring.crowdsourced.model.Observation;
+import com.waterQualityMonitoring.crowdsourced.model.Image;
 import com.waterQualityMonitoring.crowdsourced.service.CrowdsourcedService;
 
 import jakarta.validation.Valid;
@@ -144,5 +150,46 @@ public class CrowdsourcedController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping(path = "/images/{imageId}")
+    public ResponseEntity<Resource> getObservationImage(@PathVariable UUID imageId) {
+        return crowdsourcedService.getImage(imageId)
+                .flatMap(image -> buildImageResponse(image))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    private java.util.Optional<ResponseEntity<Resource>> buildImageResponse(Image image) {
+        if (image == null || image.getFilePath() == null || image.getFilePath().isBlank()) {
+            return java.util.Optional.empty();
+        }
+
+        try {
+            String rawPath = image.getFilePath();
+            Path filePath = Paths.get(rawPath);
+            if (!filePath.isAbsolute()) {
+                String relativePath = rawPath.startsWith("/") ? rawPath.substring(1) : rawPath;
+                filePath = Paths.get("").toAbsolutePath().resolve(relativePath).normalize();
+            }
+            if (!Files.exists(filePath)) {
+                return java.util.Optional.empty();
+            }
+
+            Resource resource = new UrlResource(filePath.toUri());
+            if (!resource.exists()) {
+                return java.util.Optional.empty();
+            }
+
+            String contentType = Files.probeContentType(filePath);
+            MediaType mediaType = contentType != null
+                    ? MediaType.parseMediaType(contentType)
+                    : MediaType.APPLICATION_OCTET_STREAM;
+
+            return java.util.Optional.of(ResponseEntity.ok()
+                    .contentType(mediaType)
+                    .body(resource));
+        } catch (Exception ex) {
+            return java.util.Optional.empty();
+        }
     }
 }

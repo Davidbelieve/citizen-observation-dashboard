@@ -55,10 +55,12 @@ public class RewardService {
         Map<String, Integer> pointsByCitizen = new HashMap<>();
         List<String> warnings = new ArrayList<>();
 
+        if (observations.isEmpty()) {
+            warnings.add("No observations available from crowdsourced service.");
+            return new RewardCalculationResult(List.of(), warnings);
+        }
+
         for (CrowdsourcedObservation observation : observations) {
-            if (!observation.isValidated()) {
-                continue;
-            }
             String citizenId = observation.getCitizenId();
             if (!StringUtils.hasText(citizenId)) {
                 warnings.add(buildMissingCitizenWarning(observation));
@@ -79,6 +81,10 @@ public class RewardService {
             RewardModel rewardModel = new RewardModel(citizenId, totalPoints, badgeLevel);
             rewardRepository.save(rewardModel);
             summaries.add(new RewardSummaryResponse(citizenId, totalPoints, badgeLevel));
+        }
+
+        if (summaries.isEmpty() && warnings.isEmpty()) {
+            warnings.add("No rewards generated. Check citizen IDs on observations.");
         }
 
         return new RewardCalculationResult(summaries, warnings);
@@ -113,10 +119,8 @@ public class RewardService {
     }
 
     private boolean isCompleteSubmission(CrowdsourcedObservation observation) {
-        return observation.hasPostcode()
-                && observation.hasCompleteMeasurement()
-                && observation.hasTags()
-                && observation.hasImages();
+        return observation.hasCompleteMeasurement()
+                && observation.hasTags();
     }
 
     private String buildMissingCitizenWarning(CrowdsourcedObservation observation) {
