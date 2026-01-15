@@ -1,0 +1,50 @@
+CROWDSOURCED DATA MICROSERVICE - API ENDPOINTS
+==============================================
+
+Base URL: http://localhost:8081/api/observations
+
+1. POST /api/observations
+   Description: Create a new observation
+   Request Body (JSON):
+   {
+     "citizenId": "C200",
+     "postcode": "NE1 7ST",
+     "temperature": 26.3,
+     "ph": 7.2,
+     "alkalinity": 8.5,
+     "turbidity": 2.1,
+     "observations": ["Clear water", "Good quality"],
+     "imagePaths": ["image1.jpg", "image2.jpg"]
+   }
+   Response: 201 Created with ObservationResponse
+
+2. GET /api/observations
+   Description: Get all observations
+   Response: 200 OK with List<ObservationResponse>
+
+3. GET /api/observations/{id}
+   Description: Get observation by ID
+   Path Variable: id (Long)
+   Response: 200 OK with ObservationResponse
+   Error: 404 Not Found if ID doesn't exist
+
+4. GET /api/observations/citizen/{citizenId}
+   Description: Get all observations by citizen ID
+   Path Variable: citizenId (String)
+   Response: 200 OK with List<ObservationResponse>
+
+5. GET /api/observations/postcode/{postcode}
+   Description: Get all observations by postcode
+   Path Variable: postcode (String)
+   Response: 200 OK with List<ObservationResponse>
+
+VALIDATION RULES:
+- citizenId: Required (NotBlank)
+- postcode: Required (NotBlank)
+- Observation is valid if: postcode exists AND (at least one measurement OR at least one observation note)
+
+ERROR RESPONSES:
+- 400 Bad Request: Validation errors
+- 404 Not Found: Resource not found
+- 500 Internal Server Error: Server errors
+

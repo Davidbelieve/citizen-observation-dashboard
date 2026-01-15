@@ -1,0 +1,151 @@
+{
+	"info": {
+		"_postman_id": "crowdsourced-data-ms",
+		"name": "Crowdsourced Data Microservice",
+		"description": "Complete API collection for testing the Crowdsourced Data Microservice",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create Observation - Full Data",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"citizenId\": \"C200\",\n  \"postcode\": \"NE1 7ST\",\n  \"temperature\": 26.3,\n  \"ph\": 7.2,\n  \"alkalinity\": 8.5,\n  \"turbidity\": 2.1,\n  \"observations\": [\"Clear water\", \"Good quality\"],\n  \"imagePaths\": [\"image1.jpg\", \"image2.jpg\"]\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/observations",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8081",
+					"path": ["api", "observations"]
+				}
+			}
+		},
+		{
+			"name": "Create Observation - Partial Data",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"citizenId\": \"C201\",\n  \"postcode\": \"NE2 4AB\",\n  \"temperature\": 24.5,\n  \"ph\": 6.8,\n  \"observations\": [\"Slightly cloudy\"]\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/observations",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8081",
+					"path": ["api", "observations"]
+				}
+			}
+		},
+		{
+			"name": "Get All Observations",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/observations",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8081",
+					"path": ["api", "observations"]
+				}
+			}
+		},
+		{
+			"name": "Get Observation by ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/observations/1",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8081",
+					"path": ["api", "observations", "1"]
+				}
+			}
+		},
+		{
+			"name": "Get Observations by Citizen ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/observations/citizen/C200",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8081",
+					"path": ["api", "observations", "citizen", "C200"]
+				}
+			}
+		},
+		{
+			"name": "Get Observations by Postcode",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/observations/postcode/NE1 7ST",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8081",
+					"path": ["api", "observations", "postcode", "NE1 7ST"]
+				}
+			}
+		},
+		{
+			"name": "Validation Error - Missing Citizen ID",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"postcode\": \"NE1 7ST\",\n  \"temperature\": 26.3\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/observations",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8081",
+					"path": ["api", "observations"]
+				}
+			}
+		},
+		{
+			"name": "Get Observation - Invalid ID (404)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/observations/999",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "8081",
+					"path": ["api", "observations", "999"]
+				}
+			}
+		}
+	]
+}
+
+

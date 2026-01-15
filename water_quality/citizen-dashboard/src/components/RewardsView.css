@@ -1,0 +1,151 @@
+.rewards-view-container {
+    max-width: 600px;
+    margin: 4rem auto;
+    padding: 3rem;
+    background: var(--bg-surface);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    border: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+.rewards-view-container h2 {
+    text-align: center;
+    color: var(--text-main);
+    margin-bottom: 2.5rem;
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.search-box {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    background: #f8fafc;
+    padding: 0.5rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid #e2e8f0;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 1rem;
+    border: none;
+    background: transparent;
+    font-size: 1.1rem;
+    color: var(--text-main);
+}
+
+.search-box input:focus {
+    outline: none;
+}
+
+.search-box button {
+    padding: 0 2rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.search-box button:hover {
+    background: var(--primary-dark);
+}
+
+.search-box button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.error-msg {
+    color: #ef4444;
+    background: #fef2f2;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 2rem;
+    text-align: center;
+    font-size: 0.95rem;
+    border: 1px solid #fee2e2;
+}
+
+.rewards-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+    padding: 3rem;
+    border-radius: var(--radius-xl);
+    text-align: center;
+    border: 1px solid #e2e8f0;
+    position: relative;
+    overflow: hidden;
+}
+
+.rewards-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: var(--primary-color);
+}
+
+.badge-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+.badge-icon {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: white;
+    font-size: 1.25rem;
+    background: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.badge-icon.gold {
+    background: linear-gradient(135deg, #fbbf24, #d97706);
+    box-shadow: 0 0 25px rgba(251, 191, 36, 0.3);
+}
+
+.badge-icon.silver {
+    background: linear-gradient(135deg, #cbd5e1, #64748b);
+    box-shadow: 0 0 25px rgba(203, 213, 225, 0.3);
+}
+
+.badge-icon.bronze {
+    background: linear-gradient(135deg, #d97706, #78350f);
+    box-shadow: 0 0 25px rgba(217, 119, 6, 0.3);
+}
+
+.points-display {
+    display: flex;
+    flex-direction: column;
+}
+
+.points-val {
+    font-size: 4rem;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1;
+}
+
+.points-label {
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    margin-top: 0.5rem;
+}

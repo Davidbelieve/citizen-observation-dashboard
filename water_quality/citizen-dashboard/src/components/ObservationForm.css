@@ -1,0 +1,138 @@
+/* Full Screen Container */
+.observation-form-container {
+    /* Center in the remaining viewport height (100vh - navbar height roughly 70px) */
+    min-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 1400px;
+    /* Wide layout */
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.observation-form-container h2 {
+    text-align: left;
+    color: var(--text-main);
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+    border-bottom: 3px solid var(--primary-color);
+    display: inline-block;
+    padding-bottom: 0.5rem;
+}
+
+/* Horizontal Form Layout */
+form {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    /* 3 Equal Columns */
+    gap: 2rem;
+    background: white;
+    padding: 2.5rem;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    border-top: 5px solid var(--primary-color);
+    /* Highlight top */
+    align-items: start;
+}
+
+/* Sections for the Grid Columns */
+.form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Input Styles */
+.form-group {
+    margin: 0;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+input[type="text"],
+input[type="number"],
+textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius-md);
+    background: #f8fafc;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: all 0.2s;
+}
+
+input:focus,
+textarea:focus {
+    outline: none;
+    background: white;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+}
+
+textarea {
+    resize: none;
+    height: 120px;
+}
+
+/* Specific Field Adjustments */
+.measurements-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+/* File Input Sytling */
+input[type="file"] {
+    background: white;
+    border: 2px dashed #cbd5e1;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+}
+
+input[type="file"]:hover {
+    border-color: var(--primary-color);
+    background: #f0f9ff;
+}
+
+/* Submit Button - Spans full width at bottom or specific spot? 
+   Let's ensure it's distinct. */
+.submit-btn {
+    grid-column: 1 / -1;
+    /* Span all columns */
+    margin-top: 1rem;
+    padding: 1.25rem;
+    background: var(--primary-color);
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: all 0.2s;
+}
+
+.submit-btn:hover {
+    background: var(--primary-dark);
+    transform: scale(1.01);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Responsive: Stack on mobile */
+@media (max-width: 1024px) {
+    form {
+        grid-template-columns: 1fr;
+    }
+}
