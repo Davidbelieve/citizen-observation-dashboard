@@ -1,0 +1,220 @@
+package com.waterquality.crowdsourced_data.model;
+
+//Necessary imports
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
+
+@Entity
+@Table(name="water_quality_observations")
+
+public class WaterQuality{
+	private static final Set<String> VALID_OBSERVATION_TYPES= new HashSet<>(Arrays.asList("CLEAR",
+			"CLOUDY","MURKY","FOAMY","OILY","DISCOLOURED","PRESENCE_OF_ODOUR"));
+
+  
+    @Id
+    @Column(length = 36, nullable = false)
+    private String id;
+    
+    //Citizen Id
+    @Column(name= "citizen_id",nullable = false, unique = true)
+    private String citizenId;
+    
+    //post-code
+    @Column(nullable = false)
+    private String postcode;
+    
+    //Measurements
+    private Double temperature;
+    private Double pH;
+    private Double alkalinity;
+    private Double turbidity;
+    
+    //Observations
+    @Column(length = 500)
+    private String observations;
+    
+    //Images
+    @Column(length = 500)
+    private String images;
+    
+    //Time-stamp
+    @Column(nullable = false)
+    private LocalDateTime submissionTimestamp;
+    
+  //Default constructor
+    
+    public WaterQuality() {
+    }
+    
+    public WaterQuality(String postcode) {
+    	this();
+    	this.postcode = postcode;
+    }
+    
+    //Automatically generate UUID and Timestamp
+    @PrePersist
+    private void generateIdsAndTimestamp() {
+    	if(this.id == null) {
+    		this.id = UUID.randomUUID().toString();
+    	}
+    	if (this.submissionTimestamp == null) {
+    		this.submissionTimestamp = LocalDateTime.now();
+    	}
+    			
+    }
+    
+    //Getters and Setters
+    
+    //Get
+	public String getId() {
+		return id;
+	}
+	//Set
+	public void setId(String id) {
+		this.id = id;
+	}
+	//Get
+	public String getCitizenId() {
+		return citizenId;
+	}
+	//Set
+	public void setCitizenId(String citizenId) {
+		this.citizenId = citizenId;
+	}
+	//Get
+	public String getPostcode() {
+		return postcode;
+	}
+	//Set
+	public void setPostcode(String postcode) {
+		this.postcode = postcode;
+	}
+	//Get
+	public Double getTemperature() {
+		return temperature;
+	}
+	//set
+	public void setTemperature(Double temperature) {
+		this.temperature = temperature;
+	}
+	//Get
+	public Double getpH() {
+		return pH;
+	}
+	//Set
+	public void setpH(Double pH) {
+		this.pH = pH;
+	}
+	//Get
+	public Double getAlkalinity() {
+		return alkalinity;
+	}
+	//Set
+	public void setAlkalinity(Double alkalinity) {
+		this.alkalinity = alkalinity;
+	}
+	//Get
+	public Double getTurbidity() {
+		return turbidity;
+	}
+	//Set
+	public void setTurbidity(Double turbidity) {
+		this.turbidity = turbidity;
+	}
+	//Get
+	public String getObservations() {
+		return observations;
+	}
+	//Set
+	public void setObservations(String observations) {
+		this.observations = observations;
+	}
+	//Get
+	public String getImages() {
+		return images;
+	}
+	//Set
+	public void setImages(String images) {
+		this.images = images;
+	}
+	//Get
+	public LocalDateTime getSubmissionTimestamp() {
+		return submissionTimestamp;
+	}
+	//Set
+	public void setSubmissionTimestamp(LocalDateTime submissionTimestamp) {
+		this.submissionTimestamp = submissionTimestamp;
+	}
+    
+    
+   /** Check if the minimum requirements are met
+    * Observation is valid if post-code is entered and at least one measurement 
+    * or at least one Observation 
+    * This is a boolean method: returns true if valid else false
+    */
+	
+  public boolean isValid() {
+	  //check postcode
+	  if (postcode == null || postcode.trim().isEmpty()) {
+		  return false;
+	  }
+	  //check if at least one measurement is present
+	  boolean hasMeasurement = temperature != null ||
+			                   pH != null ||
+			                   alkalinity != null ||
+			                   turbidity != null;
+	  //Check if at least one observation is present
+	  boolean hasObservation = observations != null && !observations.trim().isEmpty();		  
+     //returns true if postcode and measurement or observation is present
+			  return (hasMeasurement|| hasObservation);    
+  }
+  
+  /**Validates all the entered observation are from the predefined list
+   * returns true if all observations are valid, else false
+   */
+  
+  public boolean hasValidObservationTypes() {
+	  if(observations == null || observations.trim().isEmpty()) {
+		  return true;
+	  }
+	  
+	  String[] obsArray = observations.split(",");
+	  for(String obs : obsArray) {
+		  String trimmed = obs.trim().toUpperCase();
+		  if(!VALID_OBSERVATION_TYPES.contains(trimmed)) {
+			  return false;
+		  }
+	  }
+	  return true;
+  }
+  
+  
+  public boolean isComplete() {
+	  boolean hasPostcode = postcode != null && !postcode.trim().isEmpty();
+	  boolean hasAllMeasurements= temperature != null && pH != null &&
+			  alkalinity != null && turbidity !=null;
+	  boolean hasObservations = observations != null && !observations.trim().isEmpty();
+	  boolean hasImages = images != null && !images.trim().isEmpty();
+	  
+	  return hasPostcode && hasAllMeasurements && hasObservations && hasImages;
+  }
+  
+ /**
+  * Counts the number of images submitted
+  */
+  
+  
+  public int getImageCount() {
+	  if (images == null || images.trim().isEmpty()) {
+		  return 0;
+	  }
+	  return images.split(",").length;
+  }
+}
+

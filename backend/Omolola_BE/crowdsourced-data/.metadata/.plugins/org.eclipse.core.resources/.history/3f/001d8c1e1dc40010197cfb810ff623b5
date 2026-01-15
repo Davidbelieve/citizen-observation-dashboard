@@ -1,0 +1,74 @@
+package com.waterquality.rewards.test;
+
+//Neccessary imports
+
+import com.waterquality.rewards.model.BadgeType;
+import com.waterquality.rewards.model.Rewards;
+import com.waterquality.rewards.repository.RewardsRepository;
+import com.waterquality.rewards.service.RewardsService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
+public class RewardServiceTest {
+
+	@Mock
+	private RewardsRepository repository;
+	
+	@InjectMocks
+	private RewardsService service;
+	
+	@BeforeEach
+	public void SetUp() {
+		MockitoAnnotations.openMocks(this);
+	}
+	
+	//Test 1 - adding points for submission should successed
+	@Test
+	public void testAddPointsForSubmission_Success() {
+		// Create a citizen reward
+		String citizenId = "2025001";
+		Rewards reward = new Rewards(citizenId);
+		
+		//repository behavior
+		when(repository.findByCitizenId(citizenId)).thenReturn(Optional.of(reward));
+		when(repository.save(any(Rewards.class))).thenReturn(reward);
+		
+		//Add points for a complete submission (20 points)
+		Rewards result = service.addPointsForSubmission(citizenId, true);
+		
+		//verify points were added
+		assertNotNull(result);
+		assertEquals(20, result.getTotalPoints());
+		assertEquals(1, result.getValidSubmissions());
+		assertEquals(1, result.getCompleteSubmissions());
+		verify(repository, times(1)).save(any(Rewards.class));
+	}
+	
+	//Test 2: Null citizenID should throw 
+	@Test
+	public void testAddPointsForSubmission_NullCitizenId_ThrowsException() {
+		// should throw IllegalArgumentException
+		Exception exception = assertThrows(IllegalArgumentException.class, () ->{
+			service.addPointsForSubmission(null, false);
+		});
+	
+	
+	//verify error message
+	String expectedMessage = "Citizen ID cannot be null or empty";
+	String actualMessage = exception.getMessage();
+	assertTrue(actualMessage.contains(expectedMessage));
+	
+	//verify repository was never called
+	verify(repository, never()).save(any(Rewards.class));
+	}
+}

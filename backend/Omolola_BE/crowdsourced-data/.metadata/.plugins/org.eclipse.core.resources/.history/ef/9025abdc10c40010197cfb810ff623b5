@@ -1,0 +1,23 @@
+package com.waterquality.crowdsourced_data.test;
+
+//Necessary imports
+import com.waterquality.crowdsourced_data.model.WaterQuality;
+import com.waterquality.crowdsourced_data.repository.WaterQualityRepository;
+import com.waterquality.crowdsourced_data.service.WaterQualityService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import org.mockito.Mockito.*;
+
+public class CrowdsourcedDataTest {
+
+	@Mock
+	private WaterQualityRepository repository;
+	
+	
+}

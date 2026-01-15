@@ -2,7 +2,6 @@ import { useForm, Controller } from 'react-hook-form'
 import { Modal } from './Modal'
 import { FormController } from '../molecules/FormController'
 import { Input } from '../atoms/Input'
-import { Textarea } from '../atoms/Textarea'
 import { NumberInput } from '../atoms/NumberInput'
 import { Button } from '../atoms/Button'
 
@@ -11,17 +10,18 @@ export function ObservationForm({ isOpen, onClose, onSubmit, loading }) {
     control,
     handleSubmit,
     formState: { errors },
-    reset
+    reset,
+    watch
   } = useForm({
     defaultValues: {
       postcode: '',
       citizenUniqueId: '',
-      notes: '',
+      observations: [],  // Array for multiple selections
       temperatureC: '',
       pH: '',
       alkalinityMgPerL: '',
       turbidityNtu: '',
-      tags: ''
+      images: null
     }
   })
 
@@ -71,15 +71,26 @@ export function ObservationForm({ isOpen, onClose, onSubmit, loading }) {
   }
 
   const onSubmitForm = async (data) => {
+    // Validate: must have postcode + (at least one measurement OR at least one observation)
+    const hasMeasurement = data.temperatureC || data.pH || data.alkalinityMgPerL || data.turbidityNtu
+    const hasObservation = data.observations && data.observations.length > 0
+    
+    if (!hasMeasurement && !hasObservation) {
+      alert('Please provide at least one measurement OR select at least one observation')
+      return
+    }
+
     // Build the observation payload
     const observationData = {
       postcode: data.postcode.trim().toUpperCase(),
       citizenUniqueId: data.citizenUniqueId.trim(),
-      notes: data.notes?.trim() || null
+      observations: data.observations && data.observations.length > 0 
+        ? data.observations.join(',') 
+        : null,
+      images: data.images || null
     }
 
     // Add measurement if any measurement fields are provided
-    const hasMeasurement = data.temperatureC || data.pH || data.alkalinityMgPerL || data.turbidityNtu
     if (hasMeasurement) {
       observationData.measurement = {}
       if (data.temperatureC) observationData.measurement.temperatureC = parseFloat(data.temperatureC)
@@ -88,18 +99,11 @@ export function ObservationForm({ isOpen, onClose, onSubmit, loading }) {
       if (data.turbidityNtu) observationData.measurement.turbidityNtu = parseFloat(data.turbidityNtu)
     }
 
-    // Add tags if provided
-    if (data.tags?.trim()) {
-      observationData.tags = data.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
-    }
-
     try {
       await onSubmit(observationData)
-      // Reset form on success
       reset()
       onClose()
     } catch (error) {
-      // Error handling is done by parent component
       console.error('Form submission error:', error)
     }
   }
@@ -153,28 +157,93 @@ export function ObservationForm({ isOpen, onClose, onSubmit, loading }) {
         </FormController>
 
         <FormController
-          name="notes"
-          label="Notes"
-          error={errors.notes}
+          name="observations"
+          label="Observations (Select all that apply)"
+          error={errors.observations}
+          helpText="Select at least one if no measurements provided"
         >
           <Controller
-            name="notes"
+            name="observations"
             control={control}
-            render={({ field }) => (
-              <Textarea
-                {...field}
-                placeholder="Additional observations or comments..."
-                rows={3}
-                error={errors.notes}
-              />
-            )}
+            render={({ field: { onChange, value } }) => {
+              const selectedObservations = value || []
+              
+              const toggleObservation = (obs) => {
+                if (selectedObservations.includes(obs)) {
+                  onChange(selectedObservations.filter(o => o !== obs))
+                } else {
+                  onChange([...selectedObservations, obs])
+                }
+              }
+              
+              const observationOptions = [
+                'Clear',
+                'Cloudy',
+                'Murky',
+                'Foamy',
+                'Oily',
+                'Discoloured',
+                'Presence of Odour'
+              ]
+              
+              return (
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '8px',
+                  padding: '12px',
+                  border: `1px solid ${errors.observations ? '#ef4444' : '#e5e7eb'}`,
+                  borderRadius: '6px',
+                  backgroundColor: '#f9fafb'
+                }}>
+                  {observationOptions.map(obs => (
+                    <label 
+                      key={obs}
+                      style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '8px',
+                        cursor: 'pointer',
+                        padding: '6px',
+                        borderRadius: '4px',
+                        transition: 'background-color 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedObservations.includes(obs.toUpperCase())}
+                        onChange={() => toggleObservation(obs.toUpperCase())}
+                        style={{ 
+                          width: '16px', 
+                          height: '16px',
+                          cursor: 'pointer'
+                        }}
+                      />
+                      <span style={{ fontSize: '14px', color: '#374151' }}>
+                        {obs}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              )
+            }}
           />
+          {errors.observations && (
+            <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '4px' }}>
+              {errors.observations.message}
+            </p>
+          )}
         </FormController>
 
         <div style={{ marginBottom: '20px', padding: '16px', backgroundColor: '#f9fafb', borderRadius: '8px' }}>
           <h4 style={{ marginTop: 0, marginBottom: '12px', fontSize: '16px', fontWeight: '600', color: '#111827' }}>
             Measurements (Optional)
           </h4>
+          <p style={{ fontSize: '12px', color: '#6b7280', marginTop: 0, marginBottom: '12px' }}>
+            Provide at least one measurement if no observation is selected
+          </p>
           
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
             <FormController
@@ -268,22 +337,47 @@ export function ObservationForm({ isOpen, onClose, onSubmit, loading }) {
         </div>
 
         <FormController
-          name="tags"
-          label="Tags (comma-separated)"
-          error={errors.tags}
-          helpText="Separate multiple tags with commas"
+          name="images"
+          label="Images (Optional)"
+          error={errors.images}
+          helpText="Upload up to 3 photos of the water sample"
         >
           <Controller
-            name="tags"
+            name="images"
             control={control}
-            render={({ field }) => (
-              <Input
+            rules={{
+              validate: (files) => {
+                if (files && files.length > 3) {
+                  return 'Maximum 3 images allowed'
+                }
+                return true
+              }
+            }}
+            render={({ field: { onChange, value, ...field } }) => (
+              <input
                 {...field}
-                placeholder="e.g., pollution, algae, clear"
-                error={errors.tags}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => {
+                  const files = Array.from(e.target.files).slice(0, 3)
+                  onChange(files)
+                }}
+                style={{
+                  padding: '8px',
+                  border: `1px solid ${errors.images ? '#ef4444' : '#d1d5db'}`,
+                  borderRadius: '6px',
+                  width: '100%',
+                  fontSize: '14px'
+                }}
               />
             )}
           />
+          {errors.images && (
+            <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '4px' }}>
+              {errors.images.message}
+            </p>
+          )}
         </FormController>
 
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px' }}>
@@ -308,4 +402,3 @@ export function ObservationForm({ isOpen, onClose, onSubmit, loading }) {
     </Modal>
   )
 }
-

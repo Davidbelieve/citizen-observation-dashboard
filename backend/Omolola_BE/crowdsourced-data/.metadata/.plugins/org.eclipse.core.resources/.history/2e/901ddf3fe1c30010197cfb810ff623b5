@@ -1,0 +1,5 @@
+package com.waterquality.rewards.service;
+
+public class RewardsService {
+
+}

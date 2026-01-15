@@ -1,0 +1,5 @@
+INDEX VERSION 1.134+C:\Users\alfre\OneDrive - Northumbria University - Production Azure AD\Advance_Programming_KF7014\WaterQualityMonitoring\crowdsourced-data\.metadata\.plugins\org.eclipse.jdt.core
+333838505.index
+1865797976.index
+3996728289.index
+1066398997.index
